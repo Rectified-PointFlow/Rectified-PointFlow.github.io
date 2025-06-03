@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="Rectified Point Flow" />
+    <meta
+      name="keywords"
+      content="3D deep learning, point cloud, pose estimation"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+    <title>Rectified Point Flow: Generic Point Cloud Pose Estimation</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔀</text></svg>"
+    />
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-1FWSVCGZTG"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      gtag("js", new Date());
+
+      gtag("config", "G-1FWSVCGZTG");
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/bulma.min.css" />
+    <link rel="stylesheet" href="./css/bulma-carousel.min.css" />
+    <link rel="stylesheet" href="./css/bulma-slider.min.css" />
+    <link rel="stylesheet" href="./css/twentytwenty.css" />
+    <link rel="stylesheet" href="./css/index.css" />
+    <link rel="stylesheet" href="./css/pages.css" />
+
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./js/jquery.event.move.js"></script>
+    <script src="./js/jquery.twentytwenty.js"></script>
+    <script src="./js/bulma-carousel.min.js"></script>
+    <script src="./js/bulma-slider.min.js"></script>
+    <script src="./js/fontawesome.all.min.js"></script>
+
+    <!--MathJax-->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        svg: {
+          fontCache: "global",
+        },
+      };
+    </script>
+    <script
+      type="text/javascript"
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+
+  <body>
+    <section class="hero">
+      <div class="hero-body">
+        <div class="container is-max-desktop">
+          <div class="columns is-centered">
+            <div class="column has-text-centered">
+              <!-- <h2 class="title is-2 publication-title"> <strong><span style="color: #006400">R</span><span style="color: #006666">e</span><span style="color: #006D6D">S</span><span style="color: #007373">t</span><span style="color: #007979">y</span><span style="color: #008080">l</span><span style="color: #008686">e</span><span style="color: #008B8B">3</span><span style="color: #009090">D</span></strong></h2> -->
+              <h2 class="title is-2 publication-title">
+               🔀 Rectified Point Flow: <br> Generic Point Cloud Pose Estimation
+              </h2>
+              <div style="text-align: center; line-height: 1.6; font-size: 1.3em;">
+                <span style="margin-left: 8px;"><a href="https://taosun.io/">Tao Sun</a><sup>1,*</sup></span> 
+                <span><a href="https://www.zhuliyuan.net/">Liyuan Zhu</a><sup>1,*</sup></span> 
+                <span style="margin-left: 8px;"><a href="https://shengyuh.github.io/">Shengyu Huang</a><sup>2</sup></span>
+                <br>
+                <span><a href="https://shurans.github.io/">Shuran Song</a><sup>1</sup></span> 
+                <span style="margin-left: 8px;"><a href="https://ir0.github.io/">Iro Armeni</a><sup>1</sup></span>
+                <br>
+                <span><sup>1</sup>Stanford University</span> 
+                <span style="margin-left: 10px;"><sup>2</sup>NVIDIA Research</span> 
+                <br>
+                <span style="font-size: .9em;"><sup>*</sup>Equal contribution</span>
+            </div>
+              <!-- Buttons -->
+              <div class="column has-text-centered">
+                <div class="publication-links">
+                  <span class="link-block">
+                    <a
+                      href="https://arxiv.com"
+                      rel="noopener noreferrer"
+                      class="external-link button is-normal is-rounded is-dark"
+                    >
+                      <span class="icon">
+                        <i class="fas fa-file-pdf" style="color: orangered"></i>
+                      </span>
+                      <span>Paper</span>
+                    </a>
+                  </span>
+                  <!-- Code Link. -->
+                  <span class="link-block">
+                    <a
+                      href="https://github.com/GradientSpaces/"
+                      rel="noopener noreferrer"
+                      class="external-link button is-normal is-rounded is-dark"
+                    >
+                      <span class="icon">
+                        <i class="fab fa-github"></i>
+                      </span>
+                      <span>Code</span>
+                    </a>
+                  </span>
+                  <!-- Hugging Face Space -->
+                  <style>
+                    .link-block a.button.is-dark.disabled {
+                      background-color: #4a4a4a;
+                      opacity: 0.8;
+                      cursor: not-allowed;
+                      pointer-events: none;
+                    }
+                  </style>
+                  <span class="link-block">
+                    <a
+                      href="https://huggingface.co/gradient-spaces/"
+                      rel="noopener noreferrer"
+                      class="external-link button is-normal is-rounded is-dark"
+                    >
+                      <span class="icon">&#129303;</span>
+                      <span>Model</span>
+                    </a>
+                  </span>
+                  <span class="link-block">
+                  <a
+                    href="https://huggingface.co/"
+                    rel="noopener noreferrer"
+                    class="external-link button is-normal is-rounded is-dark"
+                  >
+                    <span class="icon">
+                      <img src="./images/dataset-icon.svg" alt="Dataset icon" width="16" height="16">
+                    </span>
+                    <span>Dataset</span>
+                  </a>
+                </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- (hidden), for video switching buttons -->
+    <img
+      id="btn_selected"
+      src="./images/circle-shadowed.svg"
+      style="display: none"
+    />
+    <img
+      id="btn_normal"
+      src="./images/circle-small.svg"
+      style="display: none"
+    />
+
+    <!-- Gallery -->
+    <section class="hero teaser is-small is-light">
+      <div class="container is-max-desktop has-text-centered">
+        <div class="hero-body">
+          <h2 class="title is-5"></h2>
+          <!-- colorbar -->
+          <div class="container is-max-desktop has-text-centered">
+            <style>
+              .colorbar-img {
+                height: 15px;
+                width: 250px;
+              }
+              @media (max-width: 750px) {
+                .colorbar-img {
+                  width: 150px;
+                }
+              }
+            </style>
+          </div>
+          <!-- Single video -->
+          <video
+            muted
+            autoplay="autoplay"
+            loop="loop"
+            width="100%"
+            controls
+            playsinline
+          >
+            <source src="./video/one-to-all/video0.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <section class="section pt-0">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+          <div class="column is-five-fifths">
+            <!-- Abstract -->
+             <br>
+            <h3 class="title is-3">Abstract</h3>
+            <div class="content has-text-justified">
+              <p>
+                We introduce <span class="methodname">Rectified Point Flow</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero is-small">
+      <div class="hero-body">
+        <div class="container is-max-desktop">
+          <!-- Teaser figure -->
+          <div class="columns is-centered has-text-centered">
+            <div class="column is-fll">
+              <div class="publication-teaser">
+                <img 
+                  src="images/overview_flow_asm.png" 
+                  alt="ReStyle3D method teaser figure"
+                  class="publication-teaser-img"
+                  style="width: 90%;"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <h2 class="content" style="max-width: 950px; margin: 1rem auto;">
+          Overview of <span class="methodname">Rectified Point Flow</span>. 
+        </h2>
+      </div>
+    </section>
+
+    <section class="section pt-0">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+          <div class="column is-five-fifths">
+            <!-- Abstract -->
+            <!-- <h3 class="title is-3">Abstract</h3>
+            <div class="content has-text-justified">
+              <p>
+                We introduce 
+              </p>
+            </div> -->
+
+            <!-- Method. -->
+            <!-- <h2 class="title is-3">How it works</h2>
+            <div class="content has-text-justified">
+              <div class="columns is-centered " style="align-items: center;">
+                <div class="column is-half">
+                  <img
+                    id="method_inference_1"
+                    width="100%"
+                    src="./images/stage1.gif"
+                    alt="Method Stage 1"
+                  />
+                  <p class="figure-caption is-centered">Stage 1: Overlap-aware Pretraining</p>
+                </div>
+                <div class="column is-half">
+                  <img
+                    id="method_inference_2"
+                    width="100%"
+                    src="./images/stage2.gif"
+                    alt="Method Stage 2"
+                  />
+                  <p class="figure-caption">Stage 2: Point Flow in Euclidean Space</p>
+                </div>
+              </div>
+            </div>
+              <div class="content has-text-justified">
+              <p>
+                <b
+                  >Two-stage approach of Pipeline. 
+                  </b>
+                  Method
+              </p>
+              </div> -->
+              <br>
+              <br>
+              <!-- Quantitative table -->
+              <section class="section">
+              <h2 class="title is-3 has-text-centered">Multi-part Shape Assembly</h2>
+
+              <!-- column labels -->
+              <!-- the full‐width composite figure -->
+              <figure class="image is-fullwidth">
+                <img
+                  id="comparison"
+                  src="./images/result_assembly.png"
+                  alt="Comparison with other methods"
+                >
+                <figcaption>
+                  <!-- <strong>Image appearance transfer results.</strong> -->
+                  Our method 
+                </figcaption>
+              </figure>
+              </section>
+
+              <section class="section">
+              <h2 class="title is-3 has-text-centered">Pairwise Registration</h2>
+
+              <!-- column labels -->
+              <!-- the full‐width composite figure -->
+              <figure class="image is-fullwidth">
+                <img
+                  id="comparison"
+                  src="./images/result_registration.png"
+                  alt="Comparison with other methods"
+                >
+                <figcaption>
+                  <!-- <strong>Image appearance transfer results.</strong> -->
+                  Our method 
+                </figcaption>
+              </figure>
+              </section>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- <section>
+      <div class="container is-max-desktop has-text-centered">
+      <h3 class="title is-4" id="mesh">Stylized Reconstruction</h3>
+        <h3 class="title is-7">Please make sure "use hardware acceleration when available" is enabled for chrome and WebGL is enabled in Safari.</h3>
+        <div class="embed-responsive embed-responsive-16by9">
+
+          <iframe width="960" height="640" src="https://sketchfab.com/playlists/embed?collection=f4c4bcbc9ee94aac81f73b43fbfbb8e0&autostart=0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" mozallowfullscreen="true" webkitallowfullscreen="true" width="100%" height="100%" frameborder="0"></iframe>
+        </div></div>
+
+    </section> -->
+    
+
+
+    <section class="section" id="BibTeX">
+      <div class="container is-max-desktop content">
+        <h2 class="title">BibTeX</h2>
+        <pre><code>@inproceedings{sun2025_rpf,
+      author = {Tao Sun and Liyuan Zhu and Shengyu Huang and Shuran Song and Iro Armeni},
+      title = {Rectified Point Flow: Generic Point Cloud Pose Estimation},
+      booktitle = {arxiv preprint},
+      year = {2025},
+    }</code></pre>
+      </div>
+    </section>
+
+
+    
+    <footer class="footer pt-4 pb-0">
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-8">
+            <div class="content">
+              <p>
+                Website template based on
+                <a href="https://github.com/nerfies/nerfies.github.io">
+                  Nerfies
+                </a>
+                and licensed under
+                <a
+                  rel="license"
+                  href="http://creativecommons.org/licenses/by-sa/4.0/"
+                >
+                  CC-BY-SA-4.0 </a
+                >.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
