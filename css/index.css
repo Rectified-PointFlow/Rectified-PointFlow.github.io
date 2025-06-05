@@ -9,8 +9,15 @@ body {
 }
 
 .link-block a {
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-top: 8px;
+    margin-left: 2px;
+    margin-right: 2px;
+    min-width: 120px;
+    transition: all 0.2s ease-in-out;
+}
+.link-block a:hover {
+    background-color: #f0f0f0;
+    border: 1px solid #888;
 }
 
 .methodname {
@@ -251,8 +258,8 @@ body {
 /* Button styles: round-rect, icon + text */
 .controls-bar button {
     background: #ffffff;
-    border: 1px solid #fff;
-    border-radius: 6px;
+    border: 1px solid #ddd;
+    border-radius: 18px;
     padding: 6px 12px;
     font-size: 1rem;
     cursor: pointer;
@@ -260,7 +267,7 @@ body {
     align-items: center;
     justify-content: center;
     width: 170px; /* Fixed width for consistency */
-    height: 40px; /* Fixed height for consistency */
+    height: 36px; /* Fixed height for consistency */
     gap: 6px;
     transition: background 0.2s, border-color 0.2s;
 }
