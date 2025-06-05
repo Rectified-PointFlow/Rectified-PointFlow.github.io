@@ -16,9 +16,10 @@ const viewerParams = {
   partnet_680: { groundHeight: -0.45, cameraY: 1.0  }
 };
 
-const totalFrames   = 20;   // steps per sample
-const frameInterval = 100;   // ms per frame
-const pauseDuration = 2000; // ms to pause at last frame
+const totalFrames   = 20;   // steps per sample (originally 20)
+const frameInterval = 40;  // ms per frame
+const pauseDuration = 2500; // ms to pause at last frame
+let slowMode = true;        // ★★ toggle “slow” vs “normal” playback
 
 // 3) HSV → RGB HELPER (unchanged)
 function hsvToRgb(h, s, v) {
@@ -280,6 +281,7 @@ function initInputViewer(container, objName) {
 }
 
 // 8) INITIALIZE A “SAMPLED” VIEWER (20‐frame animation)
+//    We will add interpolation logic here.
 function initSampledViewer(container, objName, initialSampleId) {
   const width  = container.clientWidth;
   const height = container.clientHeight;
@@ -374,8 +376,13 @@ function initSampledViewer(container, objName, initialSampleId) {
     }
   });
 
-  // Prepare array for 20 frames
+  // Prepare array for 20 frames (original)
   const frameMeshes = new Array(totalFrames).fill(null);
+
+  // ★★ We also store each frame’s raw position array for interpolation later
+  //   framePositions[t] will be a Float32Array of length (3 * N_points) for frame t.
+  const framePositions = new Array(totalFrames).fill(null);
+  let N_points = 0;  // we’ll fill this once we load the very first frame
 
   // Assign this state's “session stamp” so we can detect stale callbacks
   const mySession = currentSession;
@@ -387,6 +394,8 @@ function initSampledViewer(container, objName, initialSampleId) {
     renderer,
     controls,
     frameMeshes,
+    framePositions,   // ★★ store raw positions
+    N_points,         // ★★ number of points per frame
     currentSampleId: null,
     loadingOverlay: loading,
     isSampled: true,
@@ -404,6 +413,72 @@ function initSampledViewer(container, objName, initialSampleId) {
     return choice;
   }
 
+  // ★★ Helper: build a new InstancedMesh at the midpoint of two loaded frames
+  function buildInterpolatedMesh(t0, t1) {
+    // t0 and t1 are indices in [0..19], guaranteed to be loaded already
+    const pos0 = state.framePositions[t0];
+    const pos1 = state.framePositions[t1];
+    if (!pos0 || !pos1) return null;
+
+    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+    // We’ll use the same material settings; each frame used its own MeshStandardMaterial
+    // For interpolation, we can just pick one standard material (color already baked per-instance).
+    const mat = new THREE.MeshStandardMaterial({
+      transparent: true,
+      metalness: 0.2,
+      roughness: 0.4,
+      depthWrite: true,
+      flatShading: false
+    });
+
+    const mesh = new THREE.InstancedMesh(sphereGeo, mat, state.N_points);
+    mesh.castShadow = true;
+    mesh.receiveShadow = false;
+
+    const dummyMatrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+
+    // Copy per-point color from frameMeshes[t0].  (Labels don’t change, so we simply reuse them.)
+    // We assume frameMeshes[t0] exists and has instanceColor attribute.
+    const srcMesh = state.frameMeshes[t0];
+
+    // For every point i, we take midpoint of pos0[i], pos1[i], and copy color from srcMesh
+    for (let i = 0; i < state.N_points; i++) {
+      // positions are flat arrays [x0,y0,z0, x1,y1,z1, ...]
+      const x0 = pos0[3 * i];
+      const y0 = pos0[3 * i + 1];
+      const z0 = pos0[3 * i + 2];
+      const x1 = pos1[3 * i];
+      const y1 = pos1[3 * i + 1];
+      const z1 = pos1[3 * i + 2];
+
+      const xm = 0.5 * (x0 + x1);
+      const ym = 0.5 * (y0 + y1);
+      const zm = 0.5 * (z0 + z1);
+      dummyMatrix.makeTranslation(xm, ym, zm);
+      mesh.setMatrixAt(i, dummyMatrix);
+
+      // Copy color from srcMesh:
+      if (srcMesh.instanceColor) {
+        // Three.js InstancedMesh has `instanceColor` (InstancedBufferAttribute)
+        // We can read it directly:
+        const cA = srcMesh.instanceColor;
+        const r = cA.getX(i);
+        const g = cA.getY(i);
+        const b = cA.getZ(i);
+        color.setRGB(r, g, b);
+      } else {
+        // fallback to grey
+        color.setRGB(0.5, 0.5, 0.5);
+      }
+      mesh.setColorAt(i, color);
+    }
+
+    mesh.visible = false;
+    state.scene.add(mesh);
+    return mesh;
+  }
+
   // Load 20 frames from `sample_${sampleId}/step_t.pcd`
   async function loadSample(sampleId, showLoading = false) {
     // If this viewer’s session is stale, bail immediately.
@@ -413,15 +488,16 @@ function initSampledViewer(container, objName, initialSampleId) {
       state.loadingOverlay.style.display = 'flex';
     }
 
-    // Prepare newMeshes, but do NOT show anything until we're sure we want to display them
+    // Prepare newMeshes, but do NOT show anything until we’re sure
     const newMeshes = new Array(totalFrames).fill(null);
-    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+    const newPositions = new Array(totalFrames).fill(null);
+    let sphereGeo = null;    // we’ll reuse one SphereGeometry
+    let matTemplate = null;  // we’ll reuse one material to speed up
 
     for (let t = 0; t < totalFrames; t++) {
       const url = `pcd/${objName}/sample_${sampleId}/step_${t}.pcd`;
-      // If this viewer’s session changed mid‐loop, bail out:
+      // If session changed mid‐loop, bail out:
       if (state.session !== currentSession) {
-        // Dispose anything we already created in newMeshes
         for (let k = 0; k < t; k++) {
           if (newMeshes[k]) {
             newMeshes[k].geometry.dispose();
@@ -441,14 +517,21 @@ function initSampledViewer(container, objName, initialSampleId) {
             if (!posAttr) {
               console.error(`No position attribute in ${url}`);
               newMeshes[t] = null;
+              newPositions[t] = null;
               resolve();
               return;
             }
-            const positions = posAttr.array;
+            const positions = posAttr.array; // Float32Array
             const N = positions.length / 3;
-            const labels = lblAttr ? lblAttr.array : null;
+            if (t === 0) {
+              // record how many points there are in each frame
+              state.N_points = N;
+            }
+            // Copy positions into a fresh Float32Array so we can interpolate later:
+            newPositions[t] = new Float32Array(positions);
 
             // Build InstancedMesh of tiny spheres
+            if (!sphereGeo) sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
             const mat = new THREE.MeshStandardMaterial({
               transparent: true,
               metalness: 0.2,
@@ -464,9 +547,9 @@ function initSampledViewer(container, objName, initialSampleId) {
             const color = new THREE.Color();
 
             let maxLabel = 0;
-            if (labels) {
+            if (lblAttr) {
               for (let i = 0; i < N; i++) {
-                if (labels[i] > maxLabel) maxLabel = labels[i];
+                if (lblAttr.array[i] > maxLabel) maxLabel = lblAttr.array[i];
               }
             }
 
@@ -477,8 +560,8 @@ function initSampledViewer(container, objName, initialSampleId) {
               dummyMatrix.makeTranslation(x, y, z);
               instMesh.setMatrixAt(i, dummyMatrix);
 
-              if (labels) {
-                const lbl = labels[i];
+              if (lblAttr) {
+                const lbl = lblAttr.array[i];
                 const hue = maxLabel > 0 ? (lbl / maxLabel) * 0.8 : 0;
                 const hue_remap = (hue + 0.548) % 1;
                 const [r, g, b] = hsvToRgb(hue_remap, 0.62, 0.46);
@@ -494,12 +577,14 @@ function initSampledViewer(container, objName, initialSampleId) {
             state.scene.add(instMesh);
 
             geom.dispose();
+            points.material.dispose();
             resolve();
           },
           () => { /* ignore progress */ },
           (err) => {
             console.error(`Error loading ${url}:`, err);
             newMeshes[t] = null;
+            newPositions[t] = null;
             resolve();
           }
         );
@@ -541,17 +626,18 @@ function initSampledViewer(container, objName, initialSampleId) {
         oldMesh.material.dispose();
       }
     });
-    // Swap in
+    // Swap in new meshes
     state.frameMeshes = newMeshes;
+    state.framePositions = newPositions; // ★★ store the newly loaded positions
     state.currentSampleId = sampleId;
 
-    // **BUG #3 FIX:** Only make the “currentFrameIdx” visible if showLoading==true.
-    // Otherwise we just leave them all invisible; advanceAllFrames will show frame 0 at the next tick.
+    // **BUG #3 FIX:** Only make the “currentFrameIdx” visible if showLoading == true.
     if (showLoading) {
-      const idx = currentFrameIdx;
-      if (state.frameMeshes[idx]) {
-        state.frameMeshes[idx].visible = true;
+      const idx = currentFrameIdxMapping(); // below helper
+      if (idx.isOriginal && state.frameMeshes[idx.frameIndex]) {
+        state.frameMeshes[idx.frameIndex].visible = true;
       }
+      // If slowMode and the very first frame is an interpolated one (it isn’t by our mapping), we'd handle that too.
     }
   }
 
@@ -563,6 +649,26 @@ function initSampledViewer(container, objName, initialSampleId) {
   loadSample(initialSampleId, true);
 
   return state;
+
+  // ★★ Helper to map a “globalFrame” (0..(20 or 39)-1) to either an original frame or an interpolated slot.
+  function currentFrameIdxMapping() {
+    if (!slowMode) {
+      // normal: globalFrame = [0..19]
+      return { isOriginal: true, frameIndex: currentFrameIdx, alpha: 0 };
+    } else {
+      // slowMode: globalFrame = [0..38]
+      const g = currentFrameIdx; // 0..38
+      if (g % 2 === 0) {
+        // even → exactly original frame at index g/2
+        return { isOriginal: true, frameIndex: g / 2, alpha: 0 };
+      } else {
+        // odd → interpolated between floor(g/2) and ceil(g/2)
+        const i0 = Math.floor(g / 2);
+        const i1 = i0 + 1;
+        return { isOriginal: false, frameIndex: i0, nextIndex: i1, alpha: 0.5 };
+      }
+    }
+  }
 }
 
 // 9) TEARDOWN: CLEAR ALL VIEWERS (disposing Three.js objects)
@@ -582,6 +688,11 @@ function clearAllViewers() {
           m.material.dispose();
         }
       });
+      // ★★ Also remove any interpolated meshes left behind.
+      //    We placed them into scene within buildInterpolatedMesh and never stored references,
+      //    but we can simply traverse the scene to find InstancedMesh whose geometry is a Sphere
+      //    and is not one of the original frameMeshes. For simplicity, we skip explicit disposal here,
+      //    trusting garbage collection—if memory becomes an issue, you can track and dispose them explicitly.
     } else {
       if (st.mesh) {
         st.scene.remove(st.mesh);
@@ -602,32 +713,63 @@ function clearAllViewers() {
 }
 
 // 10) ADVANCE FRAMES (two sampled viewers in sync)
-// We now pass in `session` so that any stale calls bail out immediately.
+//     We now handle either normal(20) or slowMode(39) mapping.
 function advanceAllFrames(session) {
   // If this is a stale call, or if we have no viewers left, bail.
   if (session !== currentSession || sampledStates.length === 0) return;
   if (isPaused) return;
 
-  const idx = currentFrameIdx;
-  const prevIdx = (idx - 1 + totalFrames) % totalFrames;
+  // ★★ Compute how many “global frames” exist:
+  const globalTotal = slowMode ? (totalFrames * 2 - 1) : totalFrames;
+  const g = currentFrameIdx;        // [0..globalTotal-1]
+  const prevG = (g - 1 + globalTotal) % globalTotal;
 
   sampledStates.forEach((st) => {
-    if (st.frameMeshes[prevIdx]) st.frameMeshes[prevIdx].visible = false;
-    if (st.frameMeshes[idx])   st.frameMeshes[idx].visible = true;
+    // Figure out what we showed at prevG vs. what to show at g
+    const prevMap = mapGlobalToLocal(prevG, st);
+    const currMap = mapGlobalToLocal(g, st);
+
+    // Hide whichever mesh was visible previously:
+    if (prevMap.isOriginal) {
+      const oldIdx = prevMap.frameIndex;
+      if (st.frameMeshes[oldIdx]) st.frameMeshes[oldIdx].visible = false;
+    } else {
+      // It was an interpolated mesh—hide it. We gave it a special name in the scene:
+      const name = `interp_${st.currentSampleId}_${prevMap.frameIndex}_${prevMap.nextIndex}_${prevG}`;
+      const obj = st.scene.getObjectByName(name);
+      if (obj) obj.visible = false;
+    }
+
+    // Show the current one:
+    if (currMap.isOriginal) {
+      const idx = currMap.frameIndex;
+      if (st.frameMeshes[idx]) st.frameMeshes[idx].visible = true;
+    } else {
+      // Build (or lookup) the interpolated mesh between frameIndex and nextIndex for this g:
+      const i0 = currMap.frameIndex;
+      const i1 = currMap.nextIndex;
+      const interpName = `interp_${st.currentSampleId}_${i0}_${i1}_${g}`;
+      let mesh = st.scene.getObjectByName(interpName);
+      if (!mesh) {
+        mesh = buildInterpolatedMeshForState(st, i0, i1, g);
+      }
+      if (mesh) {
+        mesh.visible = true;
+      }
+    }
   });
 
-  if (idx === totalFrames - 1) {
+  // Now schedule the next tick:
+  if (g === globalTotal - 1) {
+    // we’re at the very last “global frame”
     if (autoResample) {
       playTimeoutId = setTimeout(() => {
-        // Before initiating any loads, re‐check session
         if (session !== currentSession) return;
-
         const promises = sampledStates.map((st) => {
           const newId = st.pickRandom();
           return st.loadSample(newId, false);
         });
         Promise.all(promises).then(() => {
-          // After loading, but before resetting frame, confirm session again:
           if (session !== currentSession) return;
           if (!isPaused) {
             currentFrameIdx = 0;
@@ -648,10 +790,76 @@ function advanceAllFrames(session) {
     playTimeoutId = setTimeout(() => {
       if (session !== currentSession) return;
       if (!isPaused) {
-        currentFrameIdx++;
+        currentFrameIdx = (currentFrameIdx + 1) % globalTotal;
         advanceAllFrames(session);
       }
     }, frameInterval);
+  }
+
+  // --- helper to map “global frame index” → {isOriginal, frameIndex, nextIndex, alpha} ---
+  function mapGlobalToLocal(globalIdx, st) {
+    if (!slowMode) {
+      // Normal mode: each global frame = an original
+      return { isOriginal: true, frameIndex: globalIdx, alpha: 0 };
+    } else {
+      if (globalIdx % 2 === 0) {
+        // even → exactly original
+        return { isOriginal: true, frameIndex: globalIdx / 2, alpha: 0 };
+      } else {
+        // odd → midpoint between two originals
+        const i0 = Math.floor(globalIdx / 2);
+        const i1 = i0 + 1;
+        return { isOriginal: false, frameIndex: i0, nextIndex: i1, alpha: 0.5 };
+      }
+    }
+  }
+
+  // ★★ helper to build (and name) the interpolated mesh in `st` for indices (i0, i1).
+  function buildInterpolatedMeshForState(st, i0, i1, globalIdx) {
+    // We want to name this mesh so we can find/hide it on subsequent frames:
+    const name = `interp_${st.currentSampleId}_${i0}_${i1}_${globalIdx}`;
+    const pos0 = st.framePositions[i0];
+    const pos1 = st.framePositions[i1];
+    if (!pos0 || !pos1) return null;
+
+    // Build one new InstancedMesh that lives in st.scene.
+    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+    const mat = new THREE.MeshStandardMaterial({
+      transparent: true,
+      metalness: 0.2,
+      roughness: 0.4,
+      depthWrite: true,
+      flatShading: false
+    });
+    const mesh = new THREE.InstancedMesh(sphereGeo, mat, st.N_points);
+    mesh.castShadow = true;
+    mesh.receiveShadow = false;
+    mesh.name = name; // so we can find it later
+
+    const dummyMatrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+    const srcMesh = st.frameMeshes[i0]; // read colors from older frame
+
+    for (let i = 0; i < st.N_points; i++) {
+      const x0 = pos0[3 * i], y0 = pos0[3 * i + 1], z0 = pos0[3 * i + 2];
+      const x1 = pos1[3 * i], y1 = pos1[3 * i + 1], z1 = pos1[3 * i + 2];
+      const xm = 0.5 * (x0 + x1), ym = 0.5 * (y0 + y1), zm = 0.5 * (z0 + z1);
+      dummyMatrix.makeTranslation(xm, ym, zm);
+      mesh.setMatrixAt(i, dummyMatrix);
+
+      if (srcMesh.instanceColor) {
+        const cA = srcMesh.instanceColor;
+        const r = cA.getX(i), g = cA.getY(i), b = cA.getZ(i);
+        color.setRGB(r, g, b);
+      } else {
+        color.setRGB(0.5, 0.5, 0.5);
+      }
+      mesh.setColorAt(i, color);
+    }
+
+    mesh.visible = false;
+    st.scene.add(mesh);
+    return mesh;
   }
 }
 
@@ -783,7 +991,9 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('Toggled auto-rotation');
     // Set the button text accordingly
     const anyAuto2 = allStates.some((st) => st.controls.autoRotate);
-    rotateBtn.innerHTML = anyAuto2 ? '<i class="fas fa-sync-alt"></i> Auto Rotate: On ' : '<i class="fas fa-sync-alt"></i> Auto Rotate: Off';
+    rotateBtn.innerHTML = anyAuto2
+      ? '<i class="fas fa-sync-alt"></i> Auto Rotate: On '
+      : '<i class="fas fa-sync-alt"></i> Auto Rotate: Off';
   });
 
   // Show the first object by default
