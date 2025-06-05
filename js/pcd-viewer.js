@@ -734,7 +734,7 @@ function advanceAllFrames(session) {
       const oldIdx = prevMap.frameIndex;
       if (st.frameMeshes[oldIdx]) st.frameMeshes[oldIdx].visible = false;
     } else {
-      // It was an interpolated mesh—hide it. We gave it a special name in the scene:
+      // It was an interpolated mesh—hide it.
       const name = `interp_${st.currentSampleId}_${prevMap.frameIndex}_${prevMap.nextIndex}_${prevG}`;
       const obj = st.scene.getObjectByName(name);
       if (obj) obj.visible = false;
@@ -761,21 +761,25 @@ function advanceAllFrames(session) {
 
   // Now schedule the next tick:
   if (g === globalTotal - 1) {
-    // we’re at the very last “global frame”
+    // We’re at the very last “global frame” → pause, then (if autoResample) load both samples
     if (autoResample) {
-      playTimeoutId = setTimeout(() => {
+      playTimeoutId = setTimeout(async () => {
         if (session !== currentSession) return;
-        const promises = sampledStates.map((st) => {
-          const newId = st.pickRandom();
-          return st.loadSample(newId, false);
-        });
-        Promise.all(promises).then(() => {
-          if (session !== currentSession) return;
-          if (!isPaused) {
-            currentFrameIdx = 0;
-            advanceAllFrames(session);
-          }
-        });
+
+        // 1) Pick a new random sample for each viewer
+        const newIds = sampledStates.map((st) => st.pickRandom());
+
+        // 2) Kick off BOTH loadSample calls, and WAIT until they both finish
+        await Promise.all(
+          sampledStates.map((st, i) => st.loadSample(newIds[i], false))
+        );
+
+        // 3) Once both are done, if still valid session & not paused, restart from frame 0
+        if (session !== currentSession) return;
+        if (!isPaused) {
+          currentFrameIdx = 0;
+          advanceAllFrames(session);
+        }
       }, pauseDuration);
     } else {
       playTimeoutId = setTimeout(() => {
