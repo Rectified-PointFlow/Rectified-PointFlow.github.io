@@ -204,7 +204,7 @@ body {
     display: flex;
     gap: 20px;
     padding: 20px;
-    background: #f0f0f0;
+    /* background: #f0f0f0; */
     justify-content: center;
 }
 
@@ -213,9 +213,8 @@ body {
     position: relative;
     width: 300px;
     height: 300px;
-    background: #F5F5F5;  /* Light grey */
     border: 1px solid #444;
-    border-radius: 4px;
+    border-radius: 6px;
     overflow: hidden;
 }
 
@@ -252,19 +251,22 @@ body {
 /* Button styles: round-rect, icon + text */
 .controls-bar button {
     background: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 12px;
+    border: 1px solid #fff;
+    border-radius: 6px;
     padding: 6px 12px;
     font-size: 1rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 170px; /* Fixed width for consistency */
+    height: 40px; /* Fixed height for consistency */
     gap: 6px;
     transition: background 0.2s, border-color 0.2s;
 }
 .controls-bar button:hover {
     background: #f0f0f0;
-    border-color: #bbb;
+    border: 1px solid #888;
 }
 .controls-bar button:active {
     background: #e0e0e0;
