@@ -712,7 +712,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // Show the first object by default
-  selectObject('partnet_78');
+  selectObject('partnet_652');
 
   // Start the render loop
   animateAll();
