@@ -133,100 +133,117 @@ viewerElems.forEach((container) => {
     // Load all 20 frames for a given sampleId
     // If showLoading=true, display overlay; otherwise, load silently
     async function loadSample(sampleId, showLoading = false) {
-    if (showLoading) {
+      if (showLoading) {
         state.loadingOverlay.style.display = 'flex';
-    }
+      }
 
-    // Remove old meshes
-    state.frameMeshes.forEach((instMesh) => {
-        if (instMesh) {
-        state.scene.remove(instMesh);
-        instMesh.geometry.dispose();
-        instMesh.material.dispose();
-        }
-    });
-    state.frameMeshes = new Array(totalFrames).fill(null);
+      // STEP 1: prepare a fresh buffer array to hold new meshes
+      const newFrameMeshes = new Array(totalFrames).fill(null);
+      const loader = new PCDLoader();
+      const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
 
-    const loader = new PCDLoader();
-    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
-
-    for (let t = 0; t < totalFrames; t++) {
+      // STEP 2: load each PCD into newFrameMeshes WITHOUT disturbing the old ones
+      for (let t = 0; t < totalFrames; t++) {
         const url = `pcd/${objName}/sample_${sampleId}/step_${t}.pcd`;
         await new Promise((resolve) => {
-        loader.load(
+          loader.load(
             url,
             (points) => {
-            const geom    = points.geometry;
-            const posAttr = geom.attributes.position;
-            const lblAttr = geom.attributes.label;
-            if (!posAttr) {
+              const geom = points.geometry;
+              const posAttr = geom.attributes.position;
+              const lblAttr = geom.attributes.label;
+              if (!posAttr) {
                 console.error(`No position in ${url}`);
-                resolve(); return;
-            }
-            const positions = posAttr.array;
-            const N = positions.length / 3;
-            let labels = null;
-            if (lblAttr) labels = lblAttr.array;
+                resolve();
+                return;
+              }
+              const positions = posAttr.array;
+              const N = positions.length / 3;
+              let labels = null;
+              if (lblAttr) labels = lblAttr.array;
 
-            // Build InstancedMesh of spheres
-            const mat = new THREE.MeshStandardMaterial({
+              // Build InstancedMesh of spheres
+              const mat = new THREE.MeshStandardMaterial({
                 transparent: true,
                 metalness: 0.2,
                 roughness: 0.5
-            });
-            const instMesh = new THREE.InstancedMesh(sphereGeo, mat, N);
-            instMesh.castShadow = true;
-            instMesh.receiveShadow = false;
+              });
+              const instMesh = new THREE.InstancedMesh(sphereGeo, mat, N);
+              instMesh.castShadow = true;
+              instMesh.receiveShadow = false;
 
-            const dummyMatrix = new THREE.Matrix4();
-            const color = new THREE.Color();
+              const dummyMatrix = new THREE.Matrix4();
+              const color = new THREE.Color();
 
-            // Find max label
-            let maxLabel = 0;
-            if (labels) {
+              // Find max label (if any)
+              let maxLabel = 0;
+              if (labels) {
                 for (let i = 0; i < N; i++) {
-                if (labels[i] > maxLabel) maxLabel = labels[i];
+                  if (labels[i] > maxLabel) maxLabel = labels[i];
                 }
-            }
+              }
 
-            for (let i = 0; i < N; i++) {
-                const x = positions[3*i];
-                const y = positions[3*i + 1];
-                const z = positions[3*i + 2];
+              for (let i = 0; i < N; i++) {
+                const x = positions[3 * i];
+                const y = positions[3 * i + 1];
+                const z = positions[3 * i + 2];
                 dummyMatrix.makeTranslation(x, y, z);
                 instMesh.setMatrixAt(i, dummyMatrix);
 
                 if (labels) {
-                const lbl = labels[i];
-                const hue = maxLabel > 0 ? (lbl / maxLabel) * 0.8 : 0;
-                const [r, g, b] = hsvToRgb(hue, 0.75, 0.6);
-                color.setRGB(r, g, b);
+                  const lbl = labels[i];
+                  const hue = maxLabel > 0 ? (lbl / maxLabel) * 0.8 : 0;
+                  const [r, g, b] = hsvToRgb(hue, 0.75, 0.6);
+                  color.setRGB(r, g, b);
                 } else {
-                color.setRGB(0.5, 0.5, 0.5);
+                  color.setRGB(0.5, 0.5, 0.5);
                 }
                 instMesh.setColorAt(i, color);
-            }
+              }
 
-            instMesh.visible = false;
-            state.frameMeshes[t] = instMesh;
-            state.scene.add(instMesh);
+              // Initially hide every new frame
+              instMesh.visible = false;
+              newFrameMeshes[t] = instMesh;
+              state.scene.add(instMesh);
 
-            geom.dispose();
-            resolve();
+              geom.dispose();
+              resolve();
             },
-            () => { /* progress ignored */ },
+            () => {
+              // progress ignored
+            },
             (err) => {
-            console.error(`Error loading ${url}:`, err);
-            state.frameMeshes[t] = null;
-            resolve();
+              console.error(`Error loading ${url}:`, err);
+              newFrameMeshes[t] = null;
+              resolve();
             }
-        );
+          );
         });
-    }
+      }
 
-    if (showLoading) {
+      // STEP 3: now that all newFrameMeshes are in place, swap them in and remove old
+      if (showLoading) {
         state.loadingOverlay.style.display = 'none';
-    }
+      }
+
+      // Remove old meshes from the scene & dispose
+      state.frameMeshes.forEach((oldMesh) => {
+        if (oldMesh) {
+          state.scene.remove(oldMesh);
+          oldMesh.geometry.dispose();
+          oldMesh.material.dispose();
+        }
+      });
+
+      // Replace the state references
+      state.frameMeshes = newFrameMeshes;
+      state.currentSampleId = sampleId;
+
+      // Finally, make the “currentFrameIdx” mesh from the new buffer visible
+      const idx = currentFrameIdx;
+      if (state.frameMeshes[idx]) {
+        state.frameMeshes[idx].visible = true;
+      }
     }
 
     // Store methods & data in state, then initialize
