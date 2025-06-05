@@ -10,7 +10,7 @@ const sampleMap = {
 
 const totalFrames   = 20;   // steps per sample
 const frameInterval = 40;   // ms per frame → 20 fps
-const pauseDuration = 1500; // ms to pause at last frame
+const pauseDuration = 2000; // ms to pause at last frame
 
 // Convert HSV to RGB (h, s, v ∈ [0,1])
 function hsvToRgb(h, s, v) {
@@ -49,7 +49,7 @@ const btnAutoResample = document.getElementById('btn-autoresample');
 viewerElems.forEach((container) => {
     const objName = container.dataset.obj;
     const groundHeight = parseFloat(container.dataset.ground) || -0.8;
-    const cameraPosY = parseFloat(container.dataset.camera) || 1.5;
+    const cameraPosY = parseFloat(container.dataset.cameray) || 1.4;
     if (!sampleMap[objName] || sampleMap[objName].length === 0) {
     console.error(`No samples for "${objName}".`);
     return;
@@ -76,6 +76,7 @@ viewerElems.forEach((container) => {
     const camera = new THREE.PerspectiveCamera(25, aspect, 0.1, 1000);
     camera.position.set(0, cameraPosY, 5);
     camera.lookAt(0, 0, 0);
+    // console.log(`Initialized camera for ${objName} at position:`, camera.position, container.dataset);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
