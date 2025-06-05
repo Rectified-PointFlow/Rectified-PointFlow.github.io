@@ -64,6 +64,8 @@
     <script src="./js/bulma-slider.min.js"></script>
     <script src="./js/fontawesome.all.min.js"></script>
     <script src="./js/pcd-viewer.js" type="module"></script>
+    <script type="module" src="https://esm.sh/gifuct-js@2.1.2"></script>
+    <script src="./js/slider.js" type="module"></script>
 
     <!--MathJax-->
     <script>
@@ -322,9 +324,10 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </div> -->
               <!-- Quantitative table -->
               <section class="section">
+                <div class="container is-max-desktop has-text-centered is-centered">
               <h2 class="title is-4 has-text-centered">Multi-part Shape Assembly</h2>
 
-              <p class="has-text-justified" style="padding-bottom: 2rem; margin: 0 auto;">
+              <p class="has-text-justified" style="width: 90%; padding-bottom: 2rem; margin: 0 auto;">
                 We evaluate our method on the multi-part shape assembly task, where the goal is to estimate the poses of multiple parts given their unposed point clouds.
                 
                 <br><br>
@@ -333,17 +336,21 @@ Notably, our unified formulation enables effective joint training on diverse dat
 
               <!-- column labels -->
               <!-- the full‐width composite figure -->
-              <figure class="image is-fullwidth">
-                <img
-                  id="comparison"
-                  src="./images/result_assembly.png"
-                  alt="Comparison with other methods"
-                >
-                <figcaption>
-                  <!-- <strong>Image appearance transfer results.</strong> -->
-                  <!-- Our method  -->
-                </figcaption>
-              </figure>
+              <div class="columns is-centered has-text-centered">
+                <figure class="image is-fullwidth">
+                  <img
+                    id="comparison"
+                    src="./images/result_assembly.png"
+                    alt="Comparison with other methods"
+                    style="width: 90%; display: block; margin: 0 auto;"
+                  >
+                  <figcaption>
+                    <!-- <strong>Image appearance transfer results.</strong> -->
+                    <!-- Our method  -->
+                  </figcaption>
+                </figure>
+              </div>
+              </div>
               </section>
 
               <!-- <section class="section">
@@ -361,14 +368,54 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </section> -->
 
               <section class="section">
+                <div class="container is-max-desktop has-text-centered is-centered">
+              <h2 class="title is-4 has-text-centered">Linear Interpolation in Noise Space</h2>
+              <p class="has-text-justified" style="width: 90%; padding-bottom: 2rem; margin: 0 auto;">
+                We visualize the linear interpolation in noise space by decoding \( Z(s) \) which linearly interpolates between two Gaussian noise vectors \( Z_0 \) and \( Z_1 \). We observe a continuous, semantically meaningful
+mapping from Gaussian noise to valid assemblies.
+              </p>
+              <div class="columns is-centered has-text-centered">
+              <div
+                class="slider-container"
+                data-gif-url="images/linear_interpolation_1.gif"
+                data-frame-start="0"
+                data-frame-end="21"
+              >
+
+                <!-- Left block: start frame (data-frame-start) -->
+                <div class="slider-block" id="startBlock">
+                  <canvas id="startCanvas"></canvas>
+                  <div class="slider-caption">Noise \(Z_0\)</div>
+                </div>
+
+                <!-- Middle block: current frame, controlled by slider -->
+                <div class="slider-block" id="midBlock">
+                  <canvas id="midCanvas"></canvas>
+                  <div class="slider-caption" id="midCaption">Noise \(Z(s) = (1 - s) Z_0 + s Z_1 \)</div>
+                </div>
+
+                <!-- Right block: end frame (data-frame-end) -->
+                <div class="slider-block" id="endBlock">
+                  <canvas id="endCanvas"></canvas>
+                  <div class="slider-caption">Noise \(Z_1\)</div>
+                </div>
+              </div>
+              </div>
+
+              <!-- Slider to pick a frame between data-frame-start and data-frame-end -->
+              <input type="range" id="frameSlider" />
+              </div>
+              </section>
+
+              <section class="section">
               <h2 class="title is-4 has-text-centered">Generalization to Unseen Assemblies</h2>
 
-                  <div class="columns is-centered" style="gap: 2rem;">
+                  <div class="columns is-centered" style="gap: 1rem;">
 
                 <!-- Visual Effects. -->
-                <div class="column">
+                <div class="column is-max-desktop">
                   <div class="content has-text-justified">
-                    <h2 class="title is-5">Parts from same categories</h2>
+                    <h2 class="title is-6 mb-2">Parts from Same Categories</h2>
                     <p style="text-align: justify;">
                       We test the model’s ability to generalize to unseen assemblies composed of parts from two different objects within the same category. 
                       Our results show that the model captures the underlying geometry of the category and can successfully re-target parts to construct a coherent shape belonging to that category.
@@ -386,7 +433,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
                 <!-- Matting. -->
                 <div class="column">
                   <div class="content has-text-justified">
-                  <h2 class="title is-5">Parts from different categories</h2>
+                  <h2 class="title is-6 mb-2">Parts from Different Categories</h2>
                   <div class="columns is-centered">
                     <div class="column content">
                       <p style="text-align:justify;">
@@ -432,8 +479,8 @@ Notably, our unified formulation enables effective joint training on diverse dat
     
 
 
-    <section class="section" id="BibTeX">
-      <div class="container is-max-desktop content">
+    <section class="section" id="BibTeX" style="margin-top: -70px;">
+      <div class="container is-max-desktop content px-2">
         <h3 class="title">BibTeX</h3>
         <pre><code>@inproceedings{sun2025_rpf,
       author = {Tao Sun and Liyuan Zhu and Shengyu Huang and Shuran Song and Iro Armeni},

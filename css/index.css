@@ -390,3 +390,40 @@ body {
   background: #fcfcfc;
   width: 100%;
 }
+
+/* Make the slider-container use 100% of its parent’s width */
+.slider-container {
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+  /* transform-origin: top left;
+  transform: scale(scaleFactor); */
+}
+
+/* Each block holds a canvas and a caption */
+.slider-block {
+    /* flex: 1; */
+    text-align: center;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+/* Style for the canvas (cropped area) */
+canvas {
+    margin: 0 0 0 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* Caption under each canvas */
+.slider-caption {
+    margin-top: 8px;
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+/* Slider styling */
+#frameSlider {
+    width: calc(90% - 40px);
+}
