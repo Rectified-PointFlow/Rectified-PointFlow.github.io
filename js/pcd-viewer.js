@@ -172,7 +172,10 @@ viewerElems.forEach((container) => {
               const mat = new THREE.MeshStandardMaterial({
                 transparent: true,
                 metalness: 0.2,
-                roughness: 0.5
+                roughness: 0.4,
+                depthWrite: true,
+                flatShading: false,
+
               });
               const instMesh = new THREE.InstancedMesh(sphereGeo, mat, N);
               instMesh.castShadow = true;
