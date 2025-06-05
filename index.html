@@ -246,7 +246,7 @@
             <!-- Abstract -->
              <br>
             <h3 class="title is-4">Abstract</h3>
-            <div class="has-text-justified" style="width: 90%; margin-bottom: 2rem; margin: 0 auto;">
+            <div class="has-text-justified" style="width: 90%; margin: 0 auto;">
               <p>
                 We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem. 
                 <!-- <br><br> -->
@@ -356,11 +356,9 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </figure>
               </section>
 
-              <section class="section">
+              <!-- <section class="section">
               <h2 class="title is-4 has-text-centered">Pairwise Registration</h2>
 
-              <!-- column labels -->
-              <!-- the full‐width composite figure -->
               <figure class="image is-fullwidth">
                 <img
                   id="comparison"
@@ -368,27 +366,59 @@ Notably, our unified formulation enables effective joint training on diverse dat
                   alt="Comparison with other methods"
                 >
                 <figcaption>
-                  <!-- <strong>Image appearance transfer results.</strong> -->
-                  <!-- Our method  -->
                 </figcaption>
               </figure>
-              </section>
+              </section> -->
 
               <section class="section">
-              <h2 class="title is-4 has-text-centered">Assembly of Different Objects</h2>
+              <h2 class="title is-4 has-text-centered">Generalization to Unseen Assemblies</h2>
 
-              <!-- column labels -->
-              <!-- the full‐width composite figure -->
-              <figure class="image is-fullwidth">
-                <img
-                  id="comparison"
-                  src="./images/merge_object.png"
-                  alt="Comparison with other methods"
-                >
-                <figcaption>
-                  <!-- <strong>Image appearance transfer results.</strong> -->
-                  <!-- Our method  -->
-                </figcaption>
+                  <div class="columns is-centered" style="gap: 2rem;">
+
+                <!-- Visual Effects. -->
+                <div class="column">
+                  <div class="content has-text-justified">
+                    <h2 class="title is-5">Parts from same categories</h2>
+                    <p style="text-align: justify;">
+                      Our method can generalize to unseen assemblies, where the parts are from two different objects. 
+                      Our model comprehends the underlying geometric structure of the category and can re-target parts to construct the final shape of the same category.
+                    </p>
+                    <img
+                      id="comparison"
+                      style="margin: 10px auto;"
+                      src="./images/merge_object_same.png"
+                      alt="Comparison with other methods"
+                    >
+                  </div>
+                </div>
+                <!--/ Visual Effects. -->
+
+                <!-- Matting. -->
+                <div class="column">
+                  <div class="content has-text-justified">
+                  <h2 class="title is-5">Parts from different categories</h2>
+                  <div class="columns is-centered">
+                    <div class="column content">
+                      <p style="text-align:justify;">
+                        Our method can also generalize where the parts come from different categories. 
+                        model can reason about part compositionality and re-target parts to construct a plausible final shape even if some of them originate in completely different objects.
+                      </p>
+                    <img
+                      id="comparison"
+                      style="margin: 10px auto;"
+                      src="./images/merge_object_diff.png"
+                      alt="Comparison with other methods"
+                    >
+                      
+                    </div>
+
+                    
+
+                  </div>
+                </div>
+              </div>
+              <!--/ Matting. -->
+              
               </figure>
               </section>
               </div>
@@ -414,7 +444,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
 
     <section class="section" id="BibTeX">
       <div class="container is-max-desktop content">
-        <h2 class="title">BibTeX</h2>
+        <h3 class="title">BibTeX</h3>
         <pre><code>@inproceedings{sun2025_rpf,
       author = {Tao Sun and Liyuan Zhu and Shengyu Huang and Shuran Song and Iro Armeni},
       title = {Rectified Point Flow: Generic Point Cloud Pose Estimation},

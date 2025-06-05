@@ -173,7 +173,7 @@ function initInputViewer(container, objName) {
   });
 
   controls.addEventListener('start', () => {
-    isPaused = true;
+    // isPaused = true;
     // Disable auto‐rotate on all when any viewer is dragged
     allStates.forEach((st) => {
       st.controls.autoRotate = false;
