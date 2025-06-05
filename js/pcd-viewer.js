@@ -531,7 +531,7 @@ function initSampledViewer(container, objName, initialSampleId) {
             newPositions[t] = new Float32Array(positions);
 
             // Build InstancedMesh of tiny spheres
-            if (!sphereGeo) sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+            if (!sphereGeo) sphereGeo = new THREE.SphereGeometry(0.01, 6, 4);
             const mat = new THREE.MeshStandardMaterial({
               transparent: true,
               metalness: 0.2,
