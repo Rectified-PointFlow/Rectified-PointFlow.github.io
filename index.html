@@ -252,7 +252,7 @@
               <p>
                 We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem. Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered. 
 In contrast to prior work that regresses part-wise poses with ad-hoc symmetry handling, our method intrinsically learns assembly symmetries without symmetry labels.
-Together with a self-supervised encoder focused on overlapping points, {\ourmethod} achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly. 
+Together with a self-supervised encoder focused on overlapping points, <span class="methodname">Rectified Point Flow</span> achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly. 
 Notably, our unified formulation enables effective joint training on diverse datasets, facilitating the learning of shared geometric priors and consequently boosting accuracy.
               </p>
             </div>
@@ -332,7 +332,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
               <br>
               <!-- Quantitative table -->
               <section class="section">
-              <h2 class="title is-3 has-text-centered">Multi-part Shape Assembly</h2>
+              <h2 class="title is-4 has-text-centered">Multi-part Shape Assembly</h2>
 
               <!-- column labels -->
               <!-- the full‐width composite figure -->
@@ -344,13 +344,13 @@ Notably, our unified formulation enables effective joint training on diverse dat
                 >
                 <figcaption>
                   <!-- <strong>Image appearance transfer results.</strong> -->
-                  Our method 
+                  <!-- Our method  -->
                 </figcaption>
               </figure>
               </section>
 
               <section class="section">
-              <h2 class="title is-3 has-text-centered">Pairwise Registration</h2>
+              <h2 class="title is-4 has-text-centered">Pairwise Registration</h2>
 
               <!-- column labels -->
               <!-- the full‐width composite figure -->
@@ -362,7 +362,25 @@ Notably, our unified formulation enables effective joint training on diverse dat
                 >
                 <figcaption>
                   <!-- <strong>Image appearance transfer results.</strong> -->
-                  Our method 
+                  <!-- Our method  -->
+                </figcaption>
+              </figure>
+              </section>
+
+              <section class="section">
+              <h2 class="title is-4 has-text-centered">Assembly of Different Objects</h2>
+
+              <!-- column labels -->
+              <!-- the full‐width composite figure -->
+              <figure class="image is-fullwidth">
+                <img
+                  id="comparison"
+                  src="./images/merge_object.png"
+                  alt="Comparison with other methods"
+                >
+                <figcaption>
+                  <!-- <strong>Image appearance transfer results.</strong> -->
+                  <!-- Our method  -->
                 </figcaption>
               </figure>
               </section>
