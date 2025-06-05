@@ -209,8 +209,9 @@ body {
 /* Container holding all three viewers side by side */
 .viewers-container {
     display: flex;
+    flex-wrap: wrap;
     gap: 20px;
-    padding: 20px;
+    padding: 10px;
     /* background: #f0f0f0; */
     justify-content: center;
 }
@@ -218,9 +219,9 @@ body {
 /* Each individual viewer box */
 .viewer {
     position: relative;
-    width: 300px;
+    width: 280px;
     height: 300px;
-    border: 1px solid #444;
+    border: 0px solid #ddd;
     border-radius: 6px;
     overflow: hidden;
 }
