@@ -218,7 +218,7 @@ body {
   position: relative;
   margin: 10px auto;
   width: 100%;
-  max-width: 980px;
+  max-width: 1030px;
   display: flex;
   justify-content: center; /* this centers the .tabs-container */
   align-items: center;
