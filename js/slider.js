@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cropX       = 430;
   const cropY       = 50;
   const cropWidth   = 340; 
-  const cropHeight  = 300;
+  const cropHeight  = 260;
   // ===========================================================
 
   // DOM references

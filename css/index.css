@@ -412,18 +412,21 @@ body {
 /* Style for the canvas (cropped area) */
 canvas {
     margin: 0 0 0 0;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     border-radius: 8px;
 }
 
 /* Caption under each canvas */
 .slider-caption {
+    color:#000;
     margin-top: 8px;
     font-family: sans-serif;
     font-size: 16px;
+    height: 2.2rem;
 }
 
 /* Slider styling */
 #frameSlider {
-    width: calc(90% - 40px);
+    margin-top: 10px;;
+    width: 90%;
 }
