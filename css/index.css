@@ -13,11 +13,14 @@ body {
     margin-left: 2px;
     margin-right: 2px;
     min-width: 120px;
+    font-size: 1.1rem;
+    font-weight: 600;
     transition: all 0.2s ease-in-out;
+    border: 1px solid #888;
 }
 .link-block a:hover {
     background-color: #f0f0f0;
-    border: 1px solid #888;
+    border: 1px solid #333;
 }
 
 .methodname {
@@ -31,9 +34,10 @@ body {
 
 .teaser .hero-body {
   padding-top: 0;
-  padding-bottom: 1rem;
+  /* padding-bottom: 1rem; */
   min-width: 100px;
   margin-bottom: 1rem;
+  margin-bottom: 0;
   align-items: center;
     justify-content: center;
 }
@@ -277,7 +281,7 @@ body {
 
 .controls-bar .tab-button.active {
   background: #e0e0e0;
-  border-color: #666;
+  border-color: #333;
 }
 
 /* ============== */
@@ -290,19 +294,19 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 10px;
+  padding: 5px;
   justify-content: center;
   align-items: flex-start;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1050px;
 }
 
 /* Each individual viewer box */
 .viewer {
   position: relative;
-  width: 300px;
-  height: 300px;
-  flex: 1 1 300px;
+  width: 320px;
+  height: 320px;
+  flex: 1 1 320px;
   /* border: 1px solid #ddd; */
   border-radius: 6px;
   overflow: hidden;
@@ -356,7 +360,7 @@ body {
 .viewer-caption hr,
 .assembled-caption hr {
   border: none;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #888;
   margin: 4px 0;
 }
 
@@ -382,7 +386,7 @@ body {
   /* border: 1px solid #bbb; */
   border-radius: 8px;
   padding: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 5px rgba(0,0,0,0.1);
   background: #fcfcfc;
   width: 100%;
 }
