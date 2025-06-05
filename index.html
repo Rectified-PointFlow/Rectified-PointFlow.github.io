@@ -231,7 +231,10 @@
             <button class="tab-button" data-obj="partnet_78">Chair</button>
             <button class="tab-button" data-obj="partnet_652">Office Chair</button>
             <button class="tab-button" data-obj="partnet_680">Table</button>
-            <button id="btn-rotate" class="rotate-button">Rotate</button>
+            
+            <button id="btn-rotate" class="rotate-button">
+              <i class="fas fa-sync-alt"></i> Auto Rotate
+            </button>
           </div>
       </div>
     </section>
@@ -243,11 +246,14 @@
             <!-- Abstract -->
              <br>
             <h3 class="title is-4">Abstract</h3>
-            <div class="content has-text-justified">
+            <div class="has-text-justified" style="width: 90%; margin-bottom: 2rem; margin: 0 auto;">
               <p>
-                We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem. Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered. 
+                We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem. 
+                <!-- <br><br> -->
+                Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered. 
 In contrast to prior work that regresses part-wise poses with ad-hoc symmetry handling, our method intrinsically learns assembly symmetries without symmetry labels.
-Together with a self-supervised encoder focused on overlapping points, {\ourmethod} achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly. 
+<br><br>
+Together with a self-supervised encoder focused on overlapping points, our method achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly. 
 Notably, our unified formulation enables effective joint training on diverse datasets, facilitating the learning of shared geometric priors and consequently boosting accuracy.
               </p>
             </div>
@@ -259,6 +265,10 @@ Notably, our unified formulation enables effective joint training on diverse dat
     <section class="hero is-small">
       <div class="hero-body">
         <div class="container is-max-desktop">
+          <h3 class="title is-4 has-text-centered">Pipeline</h3>
+        <p style="width: 90%; margin: 0 auto; padding-bottom: 1rem">
+          Rectified Point Flow supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
+        </p>
           <!-- Teaser figure -->
           <div class="columns is-centered has-text-centered">
             <div class="column is-fll">
@@ -273,9 +283,6 @@ Notably, our unified formulation enables effective joint training on diverse dat
             </div>
           </div>
         </div>
-        <h2 class="content" style="max-width: 950px; margin: 0.5rem auto;">
-          Overview of <span class="methodname">Rectified Point Flow</span>: Our formulation supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
-        </h2>
       </div>
     </section>
 
@@ -323,11 +330,16 @@ Notably, our unified formulation enables effective joint training on diverse dat
                   Method
               </p>
               </div> -->
-              <br>
-              <br>
               <!-- Quantitative table -->
               <section class="section">
-              <h2 class="title is-3 has-text-centered">Multi-part Shape Assembly</h2>
+              <h2 class="title is-4 has-text-centered">Multi-part Shape Assembly</h2>
+
+              <p class="has-text-justified" style="padding-bottom: 2rem; margin: 0 auto;">
+                We evaluate our method on the multi-part shape assembly task, where the goal is to estimate the poses of multiple parts given their unposed point clouds.
+                
+                <br><br>
+                Columns show objects with increasing number of parts (left to right). Rows display (1) colored input point clouds of each part, (2) GARF outputs (dashed boxes indicate samples limited to 20 by GARF’s design, selecting the top 20 parts by volume), (3) Rectified Point Flow outputs, and (4) ground-truth assemblies. Compared to GARF, our method produces more accurate pose estimation on most parts, especially as the number of parts increases.
+              </p>
 
               <!-- column labels -->
               <!-- the full‐width composite figure -->

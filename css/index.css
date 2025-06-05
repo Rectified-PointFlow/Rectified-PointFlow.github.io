@@ -210,21 +210,60 @@ body {
 }
 
 .controls-bar {
+  position: relative;
   margin: 10px auto;
   width: 100%;
-  max-width: 640px;
+  max-width: 900px;
   display: flex;
-  justify-content: center;
+  justify-content: center; /* this centers the .tabs-container */
   align-items: center;
-  gap: 12px;
   padding: 6px 0;
+}
+
+/* A.1) Container around just the three tabs */
+.tabs-container {
+  display: flex;
+  gap: 12px;
+  /* Because .controls-bar is justify-content:center, this .tabs-container is centered */
+}
+
+/* A.2) Rotate button sits at the right edge of .controls-bar */
+.rotate-button {
+  position: absolute;
+  right: 0;
+  background: #f5f5f5;
+  border: 0 solid #bbb;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+/* Font Awesome icon inside */
+.rotate-button i {
+  font-size: 0.9rem;
+  
+}
+
+/* Hover effect */
+.rotate-button:hover:not(:disabled) {
+    text-decoration: underline;
+
+}
+
+/* When disabled, make it semi‐transparent and cursor: default */
+.rotate-button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .controls-bar .tab-button {
   background: #ffffff;
   border: 1px solid #bbb;
-  border-radius:164px;
+  border-radius:16px;
   padding: 6px 14px;
+  margin-left: 5px;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
@@ -345,20 +384,4 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   background: #fcfcfc;
   width: 100%;
-}
-
-.rotate-button {
-  background: #ffffff;
-  border: 1px solid #bbb;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-  margin-left: 12px; /* small gap from the last tab */
-}
-
-.rotate-button:hover {
-  background: #f0f0f0;
-  border-color: #888;
 }

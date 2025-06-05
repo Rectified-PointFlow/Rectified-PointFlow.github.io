@@ -1,9 +1,4 @@
-// --------------------------------------
-//  script.js (corrected to avoid
-//  “Maximum call stack exceeded”)
-// --------------------------------------
-
-// 1) IMPORTS (make sure your bundler or <script type="module"> is set up)
+// 1) IMPORTS (ensure your bundler or <script type="module"> can find these)
 import * as THREE from 'three';
 import { PCDLoader } from 'PCDLoader';
 import { OrbitControls } from 'OrbitControls';
@@ -14,6 +9,13 @@ const sampleMap = {
   partnet_652: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19'],
   partnet_680: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
 };
+
+const viewerParams = {
+  partnet_78:  { groundHeight: -0.8, cameraY: 1.5  },
+  partnet_652: { groundHeight: -0.8,  cameraY: 1.5  },
+  partnet_680: { groundHeight: -0.45,  cameraY: 1.0  }
+};
+
 const totalFrames   = 20;   // steps per sample
 const frameInterval = 40;   // ms per frame
 const pauseDuration = 2000; // ms to pause at last frame
@@ -43,8 +45,7 @@ let autoResample = true;
 let currentFrameIdx = 0;
 let playTimeoutId = null;
 
-// We will add this “sync guard” so that once we start syncing cameras, 
-// we don’t re‐enter the sync routine from within itself.
+// Guard to avoid recursive sync‐calls
 let isSyncing = false;
 
 let inputState    = null;   // state for the static input viewer
@@ -69,36 +70,32 @@ function pickTwoRandomSamples(objName) {
 }
 
 // 6) SYNC HELPERS FOR ORBITCONTROLS
-//    When any controls fire a 'change', we read its spherical coords
-//    and apply them to all other cameras & controls—BUT only if not already syncing.
 function syncAnglesFrom(srcControls) {
   if (isSyncing) return;
-
   isSyncing = true;
   try {
-    const cam = srcControls.object;            // the THREE.Camera of the source
-    const target = srcControls.target.clone(); // typically (0,0,0)
+    const cam = srcControls.object;
+    const target = srcControls.target.clone();
     const offset = new THREE.Vector3().copy(cam.position).sub(target);
     const spherical = new THREE.Spherical().setFromVector3(offset);
 
     allStates.forEach((st) => {
-      if (st.controls === srcControls) return; // skip the source itself
+      if (st.controls === srcControls) return;
 
-      // Recompute position from the same spherical coords around that viewer's target
       const newPos = new THREE.Vector3()
         .setFromSphericalCoords(spherical.radius, spherical.phi, spherical.theta)
         .add(st.controls.target);
 
       st.camera.position.copy(newPos);
       st.camera.lookAt(st.controls.target);
-      st.controls.update(); // this will *not* re‐enter syncAnglesFrom because isSyncing===true
+      st.controls.update();
     });
   } finally {
     isSyncing = false;
   }
 }
 
-// 7) INITIALIZE A STATIC INPUT VIEWER
+// 7) INITIALIZE A STATIC INPUT VIEWER (colored by label)
 function initInputViewer(container, objName) {
   const width  = container.clientWidth;
   const height = container.clientHeight;
@@ -134,12 +131,12 @@ function initInputViewer(container, objName) {
   scene.add(dirLight);
 
   // Ground plane
-  const planeGeo = new THREE.PlaneGeometry(20, 20);
-  const planeMat = new THREE.ShadowMaterial({ opacity: 0.2 });
-  const ground = new THREE.Mesh(planeGeo, planeMat);
-  ground.rotateX(-Math.PI / 2);
-  ground.position.y = -0.45;
-  ground.receiveShadow = true;
+//   const planeGeo = new THREE.PlaneGeometry(20, 20);
+//   const planeMat = new THREE.ShadowMaterial({ opacity: 0.2 });
+//   const ground = new THREE.Mesh(planeGeo, planeMat);
+//   ground.rotateX(-Math.PI / 2);
+//   ground.position.y = -0.45;
+//   ground.receiveShadow = true;
 //   scene.add(ground);
 
   // Handle resize
@@ -166,29 +163,7 @@ function initInputViewer(container, objName) {
   controls.autoRotateSpeed = 2;
   controls.update();
 
-  controls.addEventListener('start', () => {
-    isPaused = true;
-    allStates.forEach((st) => {
-      st.controls.autoRotate = false;
-    });
-  });
-  controls.addEventListener('end', () => {
-    allStates.forEach((st) => {
-      st.controls.autoRotate = true;
-    });
-    // After finishing a drag, immediately sync camera angles
-    syncAnglesFrom(controls);
-    isPaused = false;
-  });
-  controls.addEventListener('change', () => {
-    // Only sync cameras during a *user drag*. On autoRotate, we do NOT sync here.
-    if (controls.userIsInteracting) {
-      syncAnglesFrom(controls);
-    }
-  });
-
-  // Patch OrbitControls so we know when the user is interacting.
-  // By default, OrbitControls doesn't expose a "userIsInteracting" flag, so we set it manually:
+  // Track whether user is currently dragging
   controls.userIsInteracting = false;
   controls.domElement.addEventListener('mousedown', () => {
     controls.userIsInteracting = true;
@@ -197,23 +172,104 @@ function initInputViewer(container, objName) {
     controls.userIsInteracting = false;
   });
 
-  // Load the single PCD: `pcd/${objName}/input.pcd`
-  const url = `pcd/${objName}/input.pcd`;
+  controls.addEventListener('start', () => {
+    isPaused = true;
+    // Disable auto‐rotate on all when any viewer is dragged
+    allStates.forEach((st) => {
+      st.controls.autoRotate = false;
+    });
+    // Disable the Rotate button itself
+    document.getElementById('btn-rotate').disabled = true;
+  });
+  controls.addEventListener('end', () => {
+    // isPaused = false;
+    allStates.forEach((st) => {
+      st.controls.autoRotate = true;
+    });
+    // Re-enable the Rotate button
+    document.getElementById('btn-rotate').disabled = false;
+    // Sync final angles into others
+    syncAnglesFrom(controls);
+  });
+  controls.addEventListener('change', () => {
+    if (controls.userIsInteracting) {
+      syncAnglesFrom(controls);
+    }
+  });
+
+  // LOAD “pcd/${objName}/input.pcd” and build InstancedMesh of spheres
+  const pcdUrl = `pcd/${objName}/input.pcd`;
   globalLoader.load(
-    url,
+    pcdUrl,
     (points) => {
+      const geom = points.geometry;
+      const posAttr = geom.attributes.position;
+      const lblAttr = geom.attributes.label;
+
+      if (!posAttr) {
+        console.error(`No position attribute in ${pcdUrl}`);
+        loading.innerText = 'Error';
+        return;
+      }
+
+      const positions = posAttr.array;
+      const N = positions.length / 3;
+      const labels = lblAttr ? lblAttr.array : null;
+      const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+      const mat = new THREE.MeshStandardMaterial({
+        transparent: true,
+        metalness: 0.2,
+        roughness: 0.4,
+        depthWrite: true,
+        flatShading: false
+      });
+      const instMesh = new THREE.InstancedMesh(sphereGeo, mat, N);
+      instMesh.castShadow = true;
+      instMesh.receiveShadow = false;
+
+      const dummyMatrix = new THREE.Matrix4();
+      const color = new THREE.Color();
+
+      let maxLabel = 0;
+      if (labels) {
+        for (let i = 0; i < N; i++) {
+          if (labels[i] > maxLabel) maxLabel = labels[i];
+        }
+      }
+
+      for (let i = 0; i < N; i++) {
+        const x = positions[3 * i];
+        const y = positions[3 * i + 1];
+        const z = positions[3 * i + 2];
+        dummyMatrix.makeTranslation(x, y, z);
+        instMesh.setMatrixAt(i, dummyMatrix);
+
+        if (labels) {
+          const lbl = labels[i];
+          const hue = maxLabel > 0 ? (lbl / maxLabel) * 0.8 : 0;
+          const hue_remap = (hue + 0.548) % 1;
+          const [r, g, b] = hsvToRgb(hue_remap, 0.62, 0.46);
+          color.setRGB(r, g, b);
+        } else {
+          color.setRGB(0.5, 0.5, 0.5);
+        }
+        instMesh.setColorAt(i, color);
+      }
+
+      scene.add(instMesh);
       loading.style.display = 'none';
-      scene.add(points);
-      inputState.mesh = points;
+      inputState.mesh = instMesh;
+
+      geom.dispose();
+      points.material.dispose();
     },
     () => { /* ignore progress */ },
     (err) => {
-      console.error(`Error loading input PCD ${url}:`, err);
+      console.error(`Error loading input PCD ${pcdUrl}:`, err);
       loading.innerText = 'Error';
     }
   );
 
-  // Return state
   const state = {
     container,
     scene,
@@ -226,7 +282,7 @@ function initInputViewer(container, objName) {
   return state;
 }
 
-// 8) INITIALIZE A “SAMPLED” VIEWER (20‐frame animation)
+// 8) INITIALIZE A “SAMPLED” VIEWER (20‐frame animation, unchanged)
 function initSampledViewer(container, objName, initialSampleId) {
   const width  = container.clientWidth;
   const height = container.clientHeight;
@@ -236,7 +292,7 @@ function initSampledViewer(container, objName, initialSampleId) {
   scene.background = new THREE.Color(0xF5F5F5);
 
   const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 1000);
-  camera.position.set(0, 1.4, 5);
+  camera.position.set(0, viewerParams[objName].cameraY, 5);
   camera.lookAt(0, 0, 0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -266,7 +322,7 @@ function initSampledViewer(container, objName, initialSampleId) {
   const planeMat = new THREE.ShadowMaterial({ opacity: 0.2 });
   const ground = new THREE.Mesh(planeGeo, planeMat);
   ground.rotateX(-Math.PI / 2);
-  ground.position.y = -0.8;
+  ground.position.y = viewerParams[objName].groundHeight;
   ground.receiveShadow = true;
   scene.add(ground);
 
@@ -285,7 +341,7 @@ function initSampledViewer(container, objName, initialSampleId) {
   loading.innerText = 'Loading…';
   container.appendChild(loading);
 
-  // OrbitControls (with same sync logic)
+  // OrbitControls (auto‐rotate + drag‐pause + sync)
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
   controls.enablePan = false;
@@ -294,30 +350,33 @@ function initSampledViewer(container, objName, initialSampleId) {
   controls.autoRotateSpeed = 2;
   controls.update();
 
-  controls.addEventListener('start', () => {
-    allStates.forEach((st) => {
-      st.controls.autoRotate = false;
-    });
-  });
-  controls.addEventListener('end', () => {
-    allStates.forEach((st) => {
-      st.controls.autoRotate = true;
-    });
-    // After finishing a drag, sync cameras
-    syncAnglesFrom(controls);
-  });
-  controls.addEventListener('change', () => {
-    if (controls.userIsInteracting) {
-      syncAnglesFrom(controls);
-    }
-  });
-
   controls.userIsInteracting = false;
   controls.domElement.addEventListener('mousedown', () => {
     controls.userIsInteracting = true;
   });
   document.addEventListener('mouseup', () => {
     controls.userIsInteracting = false;
+  });
+
+  controls.addEventListener('start', () => {
+    // isPaused = true;
+    allStates.forEach((st) => {
+      st.controls.autoRotate = false;
+    });
+    document.getElementById('btn-rotate').disabled = true;
+  });
+  controls.addEventListener('end', () => {
+    // isPaused = false;
+    allStates.forEach((st) => {
+      st.controls.autoRotate = true;
+    });
+    document.getElementById('btn-rotate').disabled = false;
+    syncAnglesFrom(controls);
+  });
+  controls.addEventListener('change', () => {
+    if (controls.userIsInteracting) {
+      syncAnglesFrom(controls);
+    }
   });
 
   // Prepare array for 20 frames
@@ -366,6 +425,7 @@ function initSampledViewer(container, objName, initialSampleId) {
             const lblAttr = geom.attributes.label;
             if (!posAttr) {
               console.error(`No position attribute in ${url}`);
+              newMeshes[t] = null;
               resolve();
               return;
             }
@@ -388,7 +448,6 @@ function initSampledViewer(container, objName, initialSampleId) {
             const dummyMatrix = new THREE.Matrix4();
             const color = new THREE.Color();
 
-            // Determine max label
             let maxLabel = 0;
             if (labels) {
               for (let i = 0; i < N; i++) {
@@ -415,7 +474,6 @@ function initSampledViewer(container, objName, initialSampleId) {
               instMesh.setColorAt(i, color);
             }
 
-            // Hide initially
             instMesh.visible = false;
             newMeshes[t] = instMesh;
             state.scene.add(instMesh);
@@ -423,7 +481,7 @@ function initSampledViewer(container, objName, initialSampleId) {
             geom.dispose();
             resolve();
           },
-          () => { /* progress ignored */ },
+          () => { /* ignore progress */ },
           (err) => {
             console.error(`Error loading ${url}:`, err);
             newMeshes[t] = null;
@@ -433,7 +491,6 @@ function initSampledViewer(container, objName, initialSampleId) {
       });
     }
 
-    // Swap in new meshes
     if (showLoading) {
       state.loadingOverlay.style.display = 'none';
     }
@@ -447,14 +504,12 @@ function initSampledViewer(container, objName, initialSampleId) {
     state.frameMeshes = newMeshes;
     state.currentSampleId = sampleId;
 
-    // Show the mesh at currentFrameIdx
     const idx = currentFrameIdx;
     if (state.frameMeshes[idx]) {
       state.frameMeshes[idx].visible = true;
     }
   }
 
-  // Pick initial sample, load it (with loading)
   state.currentSampleId = initialSampleId;
   loadSample(initialSampleId, true);
 
@@ -579,16 +634,16 @@ function selectObject(objName) {
   vc.appendChild(inputWrapper);
   inputState = initInputViewer(inputDiv, objName);
 
-  // B) “Generation / Point Cloud in Assembled State” (two sampled viewers)
+  // B) “Generation / Possible Assembled Point Clouds” (two sampled viewers)
   const assembledBlock = document.createElement('div');
   assembledBlock.style.display = 'flex';
   assembledBlock.style.flexDirection = 'column';
-//   assembledBlock.style.flex = '2 1 580px';
+  // (Removed: assembledBlock.style.flex = '2 1 600px';)
 
   const assembledCaption = document.createElement('div');
   assembledCaption.classList.add('assembled-caption');
   assembledCaption.innerHTML =
-    'Generation<hr><span class="assembled-subcaption">Possible Assembed Point Clouds</span>';
+    'Generation<hr><span class="assembled-subcaption">Possible Assembled Point Clouds</span>';
   assembledBlock.appendChild(assembledCaption);
 
   const twoWrap = document.createElement('div');
@@ -636,12 +691,24 @@ function selectObject(objName) {
   advanceAllFrames();
 }
 
-// 13) HOOK UP TAB BUTTONS ONCE DOM IS READY
+// 13) HOOK UP TAB BUTTONS + “Rotate” BUTTON ONCE DOM IS READY
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.tab-button').forEach((btn) => {
     btn.addEventListener('click', () => {
       selectObject(btn.dataset.obj);
     });
+  });
+
+  // Hook up the “Rotate” button to resume auto‐rotation
+  const rotateBtn = document.getElementById('btn-rotate');
+  rotateBtn.addEventListener('click', () => {
+    // isPaused = false;
+    allStates.forEach((st) => {
+      st.controls.autoRotate = true;
+    });
+    // Ensure the button is enabled
+    rotateBtn.disabled = false;
+    console.log('Resuming auto-rotation');
   });
 
   // Show the first object by default
