@@ -479,24 +479,24 @@ function initSampledViewer(container, objName, initialSampleId) {
     return mesh;
   }
 
-  // Load 20 frames from `sample_${sampleId}/step_t.pcd`
   async function loadSample(sampleId, showLoading = false) {
     // If this viewer’s session is stale, bail immediately.
-    if (state.session !== currentSession) return;
+    if (state.session !== currentSession) return null;
 
     if (showLoading) {
       state.loadingOverlay.style.display = 'flex';
     }
 
-    // Prepare newMeshes, but do NOT show anything until we’re sure
+    // Prepare newMeshes/newPositions, but DO NOT swap them in until later
     const newMeshes = new Array(totalFrames).fill(null);
     const newPositions = new Array(totalFrames).fill(null);
-    let sphereGeo = null;    // we’ll reuse one SphereGeometry
-    let matTemplate = null;  // we’ll reuse one material to speed up
+    let sphereGeo = null;
 
+    // Same loading loop as before
     for (let t = 0; t < totalFrames; t++) {
       const url = `pcd/${objName}/sample_${sampleId}/step_${t}.pcd`;
-      // If session changed mid‐loop, bail out:
+
+      // If session changed mid-loop, bail out and clean up
       if (state.session !== currentSession) {
         for (let k = 0; k < t; k++) {
           if (newMeshes[k]) {
@@ -504,7 +504,7 @@ function initSampledViewer(container, objName, initialSampleId) {
             newMeshes[k].material.dispose();
           }
         }
-        return;
+        return null;
       }
 
       await new Promise((resolve) => {
@@ -521,13 +521,13 @@ function initSampledViewer(container, objName, initialSampleId) {
               resolve();
               return;
             }
+
             const positions = posAttr.array; // Float32Array
             const N = positions.length / 3;
             if (t === 0) {
-              // record how many points there are in each frame
               state.N_points = N;
             }
-            // Copy positions into a fresh Float32Array so we can interpolate later:
+            // Copy positions into a fresh Float32Array for later interpolation:
             newPositions[t] = new Float32Array(positions);
 
             // Build InstancedMesh of tiny spheres
@@ -590,7 +590,7 @@ function initSampledViewer(container, objName, initialSampleId) {
         );
       });
 
-      // If session changed while waiting for this particular frame, bail out now:
+      // If session changed while waiting, bail and clean up
       if (state.session !== currentSession) {
         for (let k = 0; k <= t; k++) {
           if (newMeshes[k]) {
@@ -598,46 +598,50 @@ function initSampledViewer(container, objName, initialSampleId) {
             newMeshes[k].material.dispose();
           }
         }
-        return;
+        return null;
       }
     }
 
-    // Done loading all frames. If this viewer’s session is still valid, swap in newMeshes.
+    // All 20 frames are now loaded into newMeshes / newPositions
     if (state.session !== currentSession) {
-      // Already disposed above, but just in case:
+      // (Just in case) clean up
       newMeshes.forEach((m) => {
         if (m) {
           m.geometry.dispose();
           m.material.dispose();
         }
       });
-      return;
+      return null;
     }
 
     if (showLoading) {
+      // If called with showLoading===true, we immediately swap _in_ the new meshes:
       state.loadingOverlay.style.display = 'none';
-    }
 
-    // Dispose old meshes
-    state.frameMeshes.forEach((oldMesh) => {
-      if (oldMesh) {
-        state.scene.remove(oldMesh);
-        oldMesh.geometry.dispose();
-        oldMesh.material.dispose();
-      }
-    });
-    // Swap in new meshes
-    state.frameMeshes = newMeshes;
-    state.framePositions = newPositions; // ★★ store the newly loaded positions
-    state.currentSampleId = sampleId;
+      // Dispose old meshes:
+      state.frameMeshes.forEach((oldMesh) => {
+        if (oldMesh) {
+          state.scene.remove(oldMesh);
+          oldMesh.geometry.dispose();
+          oldMesh.material.dispose();
+        }
+      });
 
-    // **BUG #3 FIX:** Only make the “currentFrameIdx” visible if showLoading == true.
-    if (showLoading) {
-      const idx = currentFrameIdxMapping(); // below helper
+      // Swap in the freshly loaded meshes & positions:
+      state.frameMeshes = newMeshes;
+      state.framePositions = newPositions;
+      state.currentSampleId = sampleId;
+
+      // Show frame 0 of the new sample (because showLoading was true)
+      const idx = currentFrameIdxMapping(); // same helper as before
       if (idx.isOriginal && state.frameMeshes[idx.frameIndex]) {
         state.frameMeshes[idx.frameIndex].visible = true;
       }
-      // If slowMode and the very first frame is an interpolated one (it isn’t by our mapping), we'd handle that too.
+      return null;
+    } else {
+      // ★★ If showLoading===false, do NOT dispose or swap yet.
+      // Instead, return the freshly loaded arrays so caller can swap them all at once.
+      return { newMeshes, newPositions, sampleId };
     }
   }
 
