@@ -85,7 +85,7 @@ viewerElems.forEach((container) => {
     container.appendChild(renderer.domElement);
 
     // Ambient light
-    const ambient = new THREE.AmbientLight(0xffffff, 1.3);
+    const ambient = new THREE.AmbientLight(0xffffff, 1.8);
     scene.add(ambient);
 
     // Directional light
@@ -199,8 +199,8 @@ viewerElems.forEach((container) => {
                 if (labels) {
                   const lbl = labels[i];
                   const hue = maxLabel > 0 ? (lbl / maxLabel) * 0.8 : 0;
-                  const hue_remap = (hue + 0.58) % 1; // remap to [0, 1)
-                  const [r, g, b] = hsvToRgb(hue_remap, 0.6, 0.65);
+                  const hue_remap = (hue + 0.548) % 1; // remap to [0, 1)
+                  const [r, g, b] = hsvToRgb(hue_remap, 0.62, 0.46);
                   color.setRGB(r, g, b);
                 } else {
                   color.setRGB(0.5, 0.5, 0.5);

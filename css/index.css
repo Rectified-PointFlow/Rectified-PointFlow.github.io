@@ -227,8 +227,8 @@ body {
 /* Each individual viewer box */
 .viewer {
     position: relative;
-    width: 300px;
-    height: 300px;
+    width: 280px;
+    height: 280px; /* Fixed height for consistency */
     flex: 1 1 280px; /* Flexbox to allow responsive resizing */
     border: 0px solid #ddd;
     border-radius: 6px;
