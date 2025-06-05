@@ -5,10 +5,12 @@ import { PCDLoader } from 'PCDLoader';
 const sampleMap = {
     partnet_78: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'],
     partnet_652: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'],
+    partnet_680: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'],
 };
 
 const totalFrames   = 20;   // steps per sample
-const frameInterval = 50;   // ms per frame → 20 fps
+const frameInterval = 40;   // ms per frame → 20 fps
+const pauseDuration = 1500; // ms to pause at last frame
 
 // Convert HSV to RGB (h, s, v ∈ [0,1])
 function hsvToRgb(h, s, v) {
@@ -46,6 +48,8 @@ const btnAutoResample = document.getElementById('btn-autoresample');
 // Initialize each viewer: scene, camera, renderer, lights, overlays
 viewerElems.forEach((container) => {
     const objName = container.dataset.obj;
+    const groundHeight = parseFloat(container.dataset.ground) || -0.8;
+    const cameraPosY = parseFloat(container.dataset.camera) || 1.5;
     if (!sampleMap[objName] || sampleMap[objName].length === 0) {
     console.error(`No samples for "${objName}".`);
     return;
@@ -70,7 +74,7 @@ viewerElems.forEach((container) => {
 
     const aspect = container.clientWidth / container.clientHeight;
     const camera = new THREE.PerspectiveCamera(25, aspect, 0.1, 1000);
-    camera.position.set(0, 1.5, 5);
+    camera.position.set(0, cameraPosY, 5);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -80,11 +84,11 @@ viewerElems.forEach((container) => {
     container.appendChild(renderer.domElement);
 
     // Ambient light
-    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    const ambient = new THREE.AmbientLight(0xffffff, 1.3);
     scene.add(ambient);
 
     // Directional light
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(5, 12, 5);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 1024;
@@ -102,7 +106,7 @@ viewerElems.forEach((container) => {
     const planeMat = new THREE.ShadowMaterial({ opacity: 0.2 });
     const ground = new THREE.Mesh(planeGeo, planeMat);
     ground.rotateX(-Math.PI / 2);
-    ground.position.y = -0.8;
+    ground.position.y = groundHeight;
     ground.receiveShadow = true;
     scene.add(ground);
 
@@ -194,7 +198,8 @@ viewerElems.forEach((container) => {
                 if (labels) {
                   const lbl = labels[i];
                   const hue = maxLabel > 0 ? (lbl / maxLabel) * 0.8 : 0;
-                  const [r, g, b] = hsvToRgb(hue, 0.75, 0.6);
+                  const hue_remap = (hue + 0.58) % 1; // remap to [0, 1)
+                  const [r, g, b] = hsvToRgb(hue_remap, 0.6, 0.65);
                   color.setRGB(r, g, b);
                 } else {
                   color.setRGB(0.5, 0.5, 0.5);
@@ -300,7 +305,7 @@ function advanceAllFrames() {
                 advanceAllFrames();
                 }
             });
-        }, 1000);
+        }, pauseDuration);
     } else {
         // Just pause 1s then loop same frames
         playTimeoutId = setTimeout(() => {
@@ -308,7 +313,7 @@ function advanceAllFrames() {
             currentFrameIdx = 0;
             advanceAllFrames();
         }
-        }, 1000);
+        }, pauseDuration);
     }
     } else {
     // Normal frame advance
