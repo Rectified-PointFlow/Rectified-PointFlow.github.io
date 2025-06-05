@@ -177,6 +177,9 @@
               </div>
             </div>
           </div>
+        <p class="has-text-centered" style="margin-top: 1rem; font-size: 1em; font-weight: 500; font-style: italic; color: #000;">
+          <b><i>TL;DR:</i></b>  A point cloud generative model that turns unposed parts into assembled shapes. 
+        </p>
         </div>
       </div>
     </section>
@@ -368,42 +371,90 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </section> -->
 
               <section class="section">
-                <div class="container is-max-desktop has-text-centered is-centered">
+                <div class="container is-max-desktop" style="width: 90%; margin: 0 auto;">
               <h2 class="title is-4 has-text-centered">Linear Interpolation in Noise Space</h2>
-              <p class="has-text-justified" style="width: 90%; padding-bottom: 2rem; margin: 0 auto;">
-                We visualize the linear interpolation in noise space by decoding \( Z(s) \) which linearly interpolates between two Gaussian noise vectors \( Z_0 \) and \( Z_1 \). We observe a continuous, semantically meaningful
+              <p class="has-text-justified" style="padding-bottom: 2rem; margin: 0 auto;">
+                We visualize the linear interpolation in the noise space by generating the assembled point cloud from \( Z(s) \), where  \( Z(s) \) interpolates linearly between two Gaussian noise vectors \( Z_0 \) and \( Z_1 \). We observe a continuous, semantically meaningful
 mapping from Gaussian noise to valid assemblies.
               </p>
+
+              <h2 class="title is-6 mb-2 has-text-justified">Part Interchanging</h2>
               <div class="columns is-centered has-text-centered">
-              <div
-                class="slider-container"
-                data-gif-url="images/linear_interpolation_1.gif"
-                data-frame-start="0"
-                data-frame-end="21"
-              >
+                <div class="slider-container"
+                    data-gif-url="images/linear_interpolation_2.gif"
+                    data-frame-start="0"
+                    data-frame-end="21"
+                >
+                  <!-- ─── CANVAS ROW ─── -->
+                  <div class="canvas-row">
+                    <div class="slider-block start-block">
+                      <canvas class="start-canvas"></canvas>
+                      <div class="slider-caption">Generated from <br>\(Z_0\)</div>
+                    </div>
+                    <div class="slider-block middle-block">
+                      <canvas class="middle-canvas"></canvas>
+                      <div class="slider-caption middle-caption">
+                        Generated from <br>\(Z(s) = (1 - s) Z_0 + s Z_1\)
+                      </div>
+                    </div>
+                    <div class="slider-block end-block">
+                      <canvas class="end-canvas"></canvas>
+                      <div class="slider-caption">Generated from <br>\(Z_1\)</div>
+                    </div>
+                  </div>
 
-                <!-- Left block: start frame (data-frame-start) -->
-                <div class="slider-block" id="startBlock">
-                  <canvas id="startCanvas"></canvas>
-                  <div class="slider-caption">Generated from <br>\(Z_0\)</div>
-                </div>
-
-                <!-- Middle block: current frame, controlled by slider -->
-                <div class="slider-block" id="midBlock">
-                  <canvas id="midCanvas"></canvas>
-                  <div class="slider-caption" id="midCaption">Generated from <br>\(Z(s) = (1 - s) Z_0 + s Z_1 \)</div>
-                </div>
-
-                <!-- Right block: end frame (data-frame-end) -->
-                <div class="slider-block" id="endBlock">
-                  <canvas id="endCanvas"></canvas>
-                  <div class="slider-caption">Generated from <br>\(Z_1\)</div>
+                  <!-- ─── INFO BAR: “s = …” + slider ─── -->
+                  <div class="info-bar">
+                    <div class="s-display">
+                      \( s = \)<span class="s-value">0.00</span>
+                    </div>
+                    <input
+                      type="range"
+                      class="frame-slider"
+                      aria-label="Frame slider"
+                    />
+                  </div>
                 </div>
               </div>
-              </div>
+              
+              <h2 class="title is-6 mb-2 has-text-justified">Structural Changing</h2>
+              <div class="columns is-centered has-text-centered">
+                <div class="slider-container"
+                    data-gif-url="images/linear_interpolation_1.gif"
+                    data-frame-start="0"
+                    data-frame-end="21"
+                >
+                  <!-- ─── CANVAS ROW ─── -->
+                  <div class="canvas-row">
+                    <div class="slider-block start-block">
+                      <canvas class="start-canvas"></canvas>
+                      <div class="slider-caption">Generated from <br>\(Z_0\)</div>
+                    </div>
+                    <div class="slider-block middle-block">
+                      <canvas class="middle-canvas"></canvas>
+                      <div class="slider-caption middle-caption">
+                        Generated from <br>\(Z(s) = (1 - s) Z_0 + s Z_1\)
+                      </div>
+                    </div>
+                    <div class="slider-block end-block">
+                      <canvas class="end-canvas"></canvas>
+                      <div class="slider-caption">Generated from <br>\(Z_1\)</div>
+                    </div>
+                  </div>
 
-              <!-- Slider to pick a frame between data-frame-start and data-frame-end -->
-              <input type="range" id="frameSlider" />
+                  <!-- ─── INFO BAR: “s = …” + slider ─── -->
+                  <div class="info-bar">
+                    <div class="s-display">
+                      \( s = \)<span class="s-value">0.00</span>
+                    </div>
+                    <input
+                      type="range"
+                      class="frame-slider"
+                      aria-label="Frame slider"
+                    />
+                  </div>
+                </div>
+              </div>
               </div>
               </section>
 
@@ -477,9 +528,21 @@ mapping from Gaussian noise to valid assemblies.
 
     </section> -->
     
+<section class="section" id="BibTeX" style="margin-top: -70px;">
+      <div class="container is-max-desktop content px-2">
+        <h3 class="title">Related Links</h3>
+<p>
+  We are happy to see several interesting generative-based pose estimation works introduced around the same time as ours. Check them out as well:
+  <br>
+  - <a href="https://ai4ce.github.io/GARF/">GARF</a> combines fracture-aware pretraining with a flow matching model to predict SE(3) poses for parts, and
+  <br>
+  - <a href="https://arxiv.org/abs/2505.21539v1">Wang et al.</a> propose an SE(3)-equivariant flow matching method that handles part symmetry by construction.
+</p>
+      </div>
+    </section>
 
 
-    <section class="section" id="BibTeX" style="margin-top: -70px;">
+    <section class="section" id="BibTeX" style="margin-top: -20px;">
       <div class="container is-max-desktop content px-2">
         <h3 class="title">BibTeX</h3>
         <pre><code>@inproceedings{sun2025_rpf,
