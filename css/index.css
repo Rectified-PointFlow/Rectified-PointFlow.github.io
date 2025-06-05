@@ -209,82 +209,156 @@ body {
     user-select: all; /* Chrome and Opera */
 }
 
-/* Container holding all three viewers side by side */
+.controls-bar {
+  margin: 10px auto;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.controls-bar .tab-button {
+  background: #ffffff;
+  border: 1px solid #bbb;
+  border-radius:164px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.controls-bar .tab-button:hover {
+  background: #f0f0f0;
+  border-color: #888;
+}
+
+.controls-bar .tab-button.active {
+  background: #e0e0e0;
+  border-color: #666;
+}
+
+/* ============== */
+/* VIEWERS LAYOUT */
+/* ============== */
+
+/* Container holding all three “blocks” side by side (and wrapping) */
 .viewers-container {
-    /* center the viewers in the middle of the page */
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 10px;
-    /* background: #f0f0f0; */
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 960px; /* Limit width for larger screens */
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 10px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 960px;
 }
 
 /* Each individual viewer box */
 .viewer {
-    position: relative;
-    width: 280px;
-    height: 280px; /* Fixed height for consistency */
-    flex: 1 1 280px; /* Flexbox to allow responsive resizing */
-    border: 0px solid #ddd;
-    border-radius: 6px;
-    overflow: hidden;
+  position: relative;
+  width: 280px;
+  height: 280px;
+  flex: 1 1 280px;
+  /* border: 1px solid #ddd; */
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fafafa;
 }
 
-/* “Loading…” overlay */
+/* “Loading…” overlay inside each viewer */
 .viewer .loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(245, 245, 245, 0.8);
-    color: #333;
-    font-family: sans-serif;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    user-select: none;
-    z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(245, 245, 245, 0.85);
+  color: #333;
+  font-family: sans-serif;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
 }
 
-/* Global controls bar below the viewers */
-.controls-bar {
-    margin: 10px auto;
-    width: 640px; /* wide enough for three viewers + gaps */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    font-family: sans-serif;
+/* Small caption above each viewer */
+.viewer-caption {
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 4px;
+  text-align: center;
 }
 
-/* Button styles: round-rect, icon + text */
-.controls-bar button {
-    background: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 18px;
-    padding: 6px 12px;
-    font-size: 1rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 170px; /* Fixed width for consistency */
-    height: 36px; /* Fixed height for consistency */
-    gap: 6px;
-    transition: background 0.2s, border-color 0.2s;
+/* ============== */
+/* ASSEMBLED BOX  */
+/* ============== */
+/* General style for any “two‐line” viewer caption */
+.viewer-caption,
+.assembled-caption {
+  font-family: sans-serif;
+  font-size: 1.0rem;
+    font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  text-align: center;
+  line-height: 1.2;
 }
-.controls-bar button:hover {
-    background: #f0f0f0;
-    border: 1px solid #888;
+
+/* The <hr> between lines */
+.viewer-caption hr,
+.assembled-caption hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 4px 0;
 }
-.controls-bar button:active {
-    background: #e0e0e0;
+
+/* Sub‐caption text (second line) slightly smaller and lighter */
+.viewer-subcaption,
+.assembled-subcaption {
+  display: block;
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 5px;;
+}
+
+
+/* A wrapper around the two “sampled” viewers */
+.assembled-container {
+  display: flex;
+  flex-wrap: wrap;       /* allow the two sampled to wrap within this box */
+  justify-content: center; /* center the two sampled viewers */
+  gap: 15px;
+  /* flex: 2 1 600px;       try to keep the two side by side, but shrink if needed */
+  /* border: 1px solid #bbb; */
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: #fcfcfc;
+  width: 100%;
+}
+
+.rotate-button {
+  background: #ffffff;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin-left: 12px; /* small gap from the last tab */
+}
+
+.rotate-button:hover {
+  background: #f0f0f0;
+  border-color: #888;
 }

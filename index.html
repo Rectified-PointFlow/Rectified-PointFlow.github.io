@@ -50,7 +50,8 @@
         {
             "imports": {
                 "three": "./js/three.module.js",
-                "PCDLoader": "./js/PCDLoader.js"
+                "PCDLoader": "./js/PCDLoader.js",
+                "OrbitControls": "./js/OrbitControls.js"
             }
         }
     </script>
@@ -194,25 +195,10 @@
     <section class="hero teaser is-small is-light">
       <div class="is-max-desktop has-text-centered">
         <div class="hero-body">
-          <h2 class="title is-5"></h2>
-          <!-- colorbar -->
-          <div class="container is-max-desktop has-text-centered">
-
-          </div>
-          <!-- Single video -->
-          <!-- <video
-            muted
-            autoplay="autoplay"
-            loop="loop"
-            width="100%"
-            controls
-            playsinline
-          >
-            <source src="./video/one-to-all/video0.mp4" type="video/mp4">
-          </video> -->
+          <!-- <h2 class="title is-5"></h2> -->
 
           <!-- PCD Viewer -->
-          <div class="viewers-container">
+          <!-- <div class="viewers-container">
             <div class="viewer" data-obj="partnet_78">
               <div class="loading">Loading...</div>
             </div>
@@ -222,21 +208,30 @@
             <div class="viewer" data-obj="partnet_680" data-ground="-0.45" data-cameraY="0.3">
               <div class="loading">Loading...</div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Global controls for all viewers -->
-          <div class="controls-bar">
+          <!-- <div class="controls-bar">
             <button id="btn-playpause" title="Pause/Play">
              <img width="14px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAwklEQVR4nO2ZQQ6CMBBF/xIvbeBseArpUUgwTepCy+hYQ0bwvWRWzPym4a06EgAcmpOkQVKSNEtanmou3/rSG537QB68rIRblXs7xeVWDB8ccq9zYG5FajjoGphbsebmu8ozUbkVS2NF5VZwAQP+gBcUMkAhLyhkgEJeUMgAhbygkAEKeUEhAxTygkIGKOQFhQxQyAsKGaDQ3zzupr0/r/cbLSK2yv16FTRutGIaW1dMKoP59tOLZdxUerofyAUA7YwbY5kAc/GDB+8AAAAASUVORK5CYII=" alt="pause"> <span>Pause</span>
             </button>
             <button id="btn-autoresample" title="Toggle Re-sample">
                <img width="20px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACM0lEQVR4nO2azUobURSAP8EiTd+hEQrtzoKbtrtsahLaV7DNwq3VbTXu20ajPkQg4LbxFWITVy6UCr6DIG5EbbnlCjaMd0z0nLlMzgcHApnJ+Zk75+fegGEYhmEYhmEYxsOZBmrAGvDtkcX95mevIzo+AH3gj5L0gCoR8AzYUXR8UNpAIUvnf2Xo/I3sZRWEnQicv70SVPkYgdODUtEMQD8ChwfFvY4qTKcYcgX8BBqPWAIb/jevAnqvgaJGAGopzpcFdVdSguD6BHFWAwa4pyTNbkD/ioJ+NgIGbCro3wzod7aJ8zVggPtOgmXgCDgBTgP6T/01h8AXIVt46xNOUhJ6I9RwXY5QFS4lG6RGgsLvQromgOMRAvDb3ytGGdgGtoA5SUVAKSX7J1Ujd0+uaA4RgHVyyBRwcA/nXQJ8qmXUay9azAIXAecv/DUqLPjMf+0/a7EWCEBdy4gXwNktxefAKyXdk0A3wfl94ImWAXtZGnDHA3ippJt6YAm65ZnrV3A2piTkE/DMWJehWBuRJjmjFGErWvGt+LZ0Kz7hB4thh5FjwWEkaU/ih5AuYhtH3ymP4/9Y8sltmA2JRWRYyWBD5j/GfktsNfAEOozBpmgtJftLntBUU6rRJyI5GOkIHIx07nEw8hwleiNUBWlxA5oa1QgcHpT3KNOOwOkbaZEBhTv2BbSlm+XwVch4JbRimTwryquhq3AWMRJFX4vrAn+Tcw3YvGapMwzDMAzDMAyD3PIXrhcvcPyJl0UAAAAASUVORK5CYII=" alt="refresh"> <span>Re-sample: On</span>
             </button>
+          </div> -->
+          <div class="viewers-container">
+            <!-- JS will inject three viewers here when you click a tab -->
           </div>
             <div class="columns is-centered has-text-centered" style="margin-top: 1rem;">
               <p class="subtitle is-6" style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
-                Each time, it generates a new configuration. Toggle the 'Re-sample' button to turn it off and on.
+                Each time, the model generates a new configuration. Orbit the viewer to see from different angles.
               </p>
+          </div>
+          <div class="controls-bar">
+            <button class="tab-button" data-obj="partnet_78">Chair</button>
+            <button class="tab-button" data-obj="partnet_652">Office Chair</button>
+            <button class="tab-button" data-obj="partnet_680">Table</button>
+            <button id="btn-rotate" class="rotate-button">Rotate</button>
           </div>
       </div>
     </section>
@@ -247,7 +242,7 @@
           <div class="column is-five-fifths">
             <!-- Abstract -->
              <br>
-            <h3 class="title is-3">Abstract</h3>
+            <h3 class="title is-4">Abstract</h3>
             <div class="content has-text-justified">
               <p>
                 We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem. Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered. 
