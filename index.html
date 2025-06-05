@@ -255,7 +255,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
     <section class="hero is-small">
       <div class="hero-body">
         <div class="container is-max-desktop">
-          <h3 class="title is-4 has-text-centered">Pipeline</h3>
+          <h3 class="title is-4 has-text-centered">Framework</h3>
         <p style="width: 90%; margin: 0 auto; padding-bottom: 1rem">
           Rectified Point Flow supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
         </p>
@@ -370,8 +370,8 @@ Notably, our unified formulation enables effective joint training on diverse dat
                   <div class="content has-text-justified">
                     <h2 class="title is-5">Parts from same categories</h2>
                     <p style="text-align: justify;">
-                      Our method can generalize to unseen assemblies, where the parts are from two different objects. 
-                      Our model comprehends the underlying geometric structure of the category and can re-target parts to construct the final shape of the same category.
+                      We test the model’s ability to generalize to unseen assemblies composed of parts from two different objects within the same category. 
+                      Our results show that the model captures the underlying geometry of the category and can successfully re-target parts to construct a coherent shape belonging to that category.
                     </p>
                     <img
                       id="comparison"
@@ -390,8 +390,8 @@ Notably, our unified formulation enables effective joint training on diverse dat
                   <div class="columns is-centered">
                     <div class="column content">
                       <p style="text-align:justify;">
-                        Our method can also generalize where the parts come from different categories. 
-                        model can reason about part compositionality and re-target parts to construct a plausible final shape even if some of them originate in completely different objects.
+                        Surprisingly, our method can also generalize to certain parts from different categories, which is particularly challenging. 
+                        This indicates that the model can reason about part compositionality and re-target parts to produce a plausible final shape, even when some parts originate from completely different categories.
                       </p>
                     <img
                       id="comparison"
