@@ -31,8 +31,9 @@ body {
 
 .teaser .hero-body {
   padding-top: 0;
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
   min-width: 100px;
+  margin-bottom: 1rem;
   align-items: center;
     justify-content: center;
 }
@@ -243,7 +244,7 @@ body {
 /* Font Awesome icon inside */
 .rotate-button i {
   font-size: 0.9rem;
-  
+
 }
 
 /* Hover effect */
@@ -343,7 +344,7 @@ body {
 .viewer-caption,
 .assembled-caption {
   font-family: sans-serif;
-  font-size: 1.0rem;
+  font-size: 1.1rem;
     font-weight: 600;
   color: #333;
   margin-bottom: 6px;
@@ -363,7 +364,7 @@ body {
 .viewer-subcaption,
 .assembled-subcaption {
   display: block;
-  font-size: 0.95rem;
+  font-size: 1.0rem;
   color: #666;
   font-weight: 400;
   margin-top: 4px;
