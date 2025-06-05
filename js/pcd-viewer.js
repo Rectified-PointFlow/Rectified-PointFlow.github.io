@@ -12,12 +12,12 @@ const sampleMap = {
 
 const viewerParams = {
   partnet_78:  { groundHeight: -0.8, cameraY: 1.5  },
-  partnet_652: { groundHeight: -0.8,  cameraY: 1.5  },
-  partnet_680: { groundHeight: -0.45,  cameraY: 1.0  }
+  partnet_652: { groundHeight: -0.8, cameraY: 1.5  },
+  partnet_680: { groundHeight: -0.45, cameraY: 1.0  }
 };
 
 const totalFrames   = 20;   // steps per sample
-const frameInterval = 40;   // ms per frame
+const frameInterval = 100;   // ms per frame
 const pauseDuration = 2000; // ms to pause at last frame
 
 // 3) HSV → RGB HELPER (unchanged)
@@ -44,6 +44,10 @@ let isPaused = false;
 let autoResample = true;
 let currentFrameIdx = 0;
 let playTimeoutId = null;
+
+// We introduce a “session” counter. Each time selectObject() is called, we increment this.
+// Any in‐flight timeouts/promises that finish for an old session will compare against this and bail out.
+let currentSession = 0;
 
 // Guard to avoid recursive sync‐calls
 let isSyncing = false;
@@ -130,15 +134,6 @@ function initInputViewer(container, objName) {
   dirLight.shadow.camera.bottom = -10;
   scene.add(dirLight);
 
-  // Ground plane
-//   const planeGeo = new THREE.PlaneGeometry(20, 20);
-//   const planeMat = new THREE.ShadowMaterial({ opacity: 0.2 });
-//   const ground = new THREE.Mesh(planeGeo, planeMat);
-//   ground.rotateX(-Math.PI / 2);
-//   ground.position.y = -0.45;
-//   ground.receiveShadow = true;
-//   scene.add(ground);
-
   // Handle resize
   window.addEventListener('resize', () => {
     const w = container.clientWidth;
@@ -173,7 +168,6 @@ function initInputViewer(container, objName) {
   });
 
   controls.addEventListener('start', () => {
-    // isPaused = true;
     // Disable auto‐rotate on all when any viewer is dragged
     allStates.forEach((st) => {
       st.controls.autoRotate = false;
@@ -182,12 +176,15 @@ function initInputViewer(container, objName) {
     document.getElementById('btn-rotate').disabled = true;
   });
   controls.addEventListener('end', () => {
-    // isPaused = false;
+    // Re‐enable auto‐rotate on all once dragging ends if the button text is still “On”
+    const rotateBtn = document.getElementById('btn-rotate');
+    const isAutoRotate = rotateBtn.innerHTML.includes(': On');
+    console.log('End dragging, auto-rotate:', isAutoRotate);
+    document.getElementById('btn-rotate').disabled = false;
+    if (!isAutoRotate) return;
     allStates.forEach((st) => {
       st.controls.autoRotate = true;
     });
-    // Re-enable the Rotate button
-    document.getElementById('btn-rotate').disabled = false;
     // Sync final angles into others
     syncAnglesFrom(controls);
   });
@@ -282,7 +279,7 @@ function initInputViewer(container, objName) {
   return state;
 }
 
-// 8) INITIALIZE A “SAMPLED” VIEWER (20‐frame animation, unchanged)
+// 8) INITIALIZE A “SAMPLED” VIEWER (20‐frame animation)
 function initSampledViewer(container, objName, initialSampleId) {
   const width  = container.clientWidth;
   const height = container.clientHeight;
@@ -359,14 +356,12 @@ function initSampledViewer(container, objName, initialSampleId) {
   });
 
   controls.addEventListener('start', () => {
-    // isPaused = true;
     allStates.forEach((st) => {
       st.controls.autoRotate = false;
     });
     document.getElementById('btn-rotate').disabled = true;
   });
   controls.addEventListener('end', () => {
-    // isPaused = false;
     allStates.forEach((st) => {
       st.controls.autoRotate = true;
     });
@@ -382,6 +377,9 @@ function initSampledViewer(container, objName, initialSampleId) {
   // Prepare array for 20 frames
   const frameMeshes = new Array(totalFrames).fill(null);
 
+  // Assign this state's “session stamp” so we can detect stale callbacks
+  const mySession = currentSession;
+
   const state = {
     container,
     scene,
@@ -391,7 +389,8 @@ function initSampledViewer(container, objName, initialSampleId) {
     frameMeshes,
     currentSampleId: null,
     loadingOverlay: loading,
-    isSampled: true
+    isSampled: true,
+    session: mySession
   };
 
   // Helper: pick a random sample ≠ current
@@ -407,15 +406,31 @@ function initSampledViewer(container, objName, initialSampleId) {
 
   // Load 20 frames from `sample_${sampleId}/step_t.pcd`
   async function loadSample(sampleId, showLoading = false) {
+    // If this viewer’s session is stale, bail immediately.
+    if (state.session !== currentSession) return;
+
     if (showLoading) {
       state.loadingOverlay.style.display = 'flex';
     }
 
+    // Prepare newMeshes, but do NOT show anything until we're sure we want to display them
     const newMeshes = new Array(totalFrames).fill(null);
     const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
 
     for (let t = 0; t < totalFrames; t++) {
       const url = `pcd/${objName}/sample_${sampleId}/step_${t}.pcd`;
+      // If this viewer’s session changed mid‐loop, bail out:
+      if (state.session !== currentSession) {
+        // Dispose anything we already created in newMeshes
+        for (let k = 0; k < t; k++) {
+          if (newMeshes[k]) {
+            newMeshes[k].geometry.dispose();
+            newMeshes[k].material.dispose();
+          }
+        }
+        return;
+      }
+
       await new Promise((resolve) => {
         globalLoader.load(
           url,
@@ -489,11 +504,36 @@ function initSampledViewer(container, objName, initialSampleId) {
           }
         );
       });
+
+      // If session changed while waiting for this particular frame, bail out now:
+      if (state.session !== currentSession) {
+        for (let k = 0; k <= t; k++) {
+          if (newMeshes[k]) {
+            newMeshes[k].geometry.dispose();
+            newMeshes[k].material.dispose();
+          }
+        }
+        return;
+      }
+    }
+
+    // Done loading all frames. If this viewer’s session is still valid, swap in newMeshes.
+    if (state.session !== currentSession) {
+      // Already disposed above, but just in case:
+      newMeshes.forEach((m) => {
+        if (m) {
+          m.geometry.dispose();
+          m.material.dispose();
+        }
+      });
+      return;
     }
 
     if (showLoading) {
       state.loadingOverlay.style.display = 'none';
     }
+
+    // Dispose old meshes
     state.frameMeshes.forEach((oldMesh) => {
       if (oldMesh) {
         state.scene.remove(oldMesh);
@@ -501,27 +541,38 @@ function initSampledViewer(container, objName, initialSampleId) {
         oldMesh.material.dispose();
       }
     });
+    // Swap in
     state.frameMeshes = newMeshes;
     state.currentSampleId = sampleId;
 
-    const idx = currentFrameIdx;
-    if (state.frameMeshes[idx]) {
-      state.frameMeshes[idx].visible = true;
+    // **BUG #3 FIX:** Only make the “currentFrameIdx” visible if showLoading==true.
+    // Otherwise we just leave them all invisible; advanceAllFrames will show frame 0 at the next tick.
+    if (showLoading) {
+      const idx = currentFrameIdx;
+      if (state.frameMeshes[idx]) {
+        state.frameMeshes[idx].visible = true;
+      }
     }
   }
 
   state.currentSampleId = initialSampleId;
-  loadSample(initialSampleId, true);
-
   state.pickRandom = pickRandomSample;
   state.loadSample = loadSample;
+
+  // Immediately start the first load, and show frame 0 once it finishes.
+  loadSample(initialSampleId, true);
 
   return state;
 }
 
 // 9) TEARDOWN: CLEAR ALL VIEWERS (disposing Three.js objects)
 function clearAllViewers() {
+  // Force any in‐flight advanceAllFrames to bail
+  currentSession++;
+
+  // Clear the one outstanding timeout for advanceAllFrames
   clearTimeout(playTimeoutId);
+
   allStates.forEach((st) => {
     if (st.isSampled) {
       st.frameMeshes.forEach((m) => {
@@ -543,6 +594,7 @@ function clearAllViewers() {
       st.renderer.dispose();
     }
   });
+
   document.querySelector('.viewers-container').innerHTML = '';
   inputState = null;
   sampledStates = [];
@@ -550,7 +602,10 @@ function clearAllViewers() {
 }
 
 // 10) ADVANCE FRAMES (two sampled viewers in sync)
-function advanceAllFrames() {
+// We now pass in `session` so that any stale calls bail out immediately.
+function advanceAllFrames(session) {
+  // If this is a stale call, or if we have no viewers left, bail.
+  if (session !== currentSession || sampledStates.length === 0) return;
   if (isPaused) return;
 
   const idx = currentFrameIdx;
@@ -558,36 +613,43 @@ function advanceAllFrames() {
 
   sampledStates.forEach((st) => {
     if (st.frameMeshes[prevIdx]) st.frameMeshes[prevIdx].visible = false;
-    if (st.frameMeshes[idx]) st.frameMeshes[idx].visible = true;
+    if (st.frameMeshes[idx])   st.frameMeshes[idx].visible = true;
   });
 
   if (idx === totalFrames - 1) {
     if (autoResample) {
       playTimeoutId = setTimeout(() => {
+        // Before initiating any loads, re‐check session
+        if (session !== currentSession) return;
+
         const promises = sampledStates.map((st) => {
           const newId = st.pickRandom();
           return st.loadSample(newId, false);
         });
         Promise.all(promises).then(() => {
+          // After loading, but before resetting frame, confirm session again:
+          if (session !== currentSession) return;
           if (!isPaused) {
             currentFrameIdx = 0;
-            advanceAllFrames();
+            advanceAllFrames(session);
           }
         });
       }, pauseDuration);
     } else {
       playTimeoutId = setTimeout(() => {
+        if (session !== currentSession) return;
         if (!isPaused) {
           currentFrameIdx = 0;
-          advanceAllFrames();
+          advanceAllFrames(session);
         }
       }, pauseDuration);
     }
   } else {
     playTimeoutId = setTimeout(() => {
+      if (session !== currentSession) return;
       if (!isPaused) {
         currentFrameIdx++;
-        advanceAllFrames();
+        advanceAllFrames(session);
       }
     }, frameInterval);
   }
@@ -605,12 +667,16 @@ function animateAll() {
 
 // 12) BUILD VIEWERS WHEN A TAB IS CLICKED
 function selectObject(objName) {
+  // 1) Tear down anything from the last session
   clearAllViewers();
 
-  // Mark active tab
+  // 2) Mark active tab
   document.querySelectorAll('.tab-button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.obj === objName);
   });
+
+  // 3) Increment session so that any in‐flight timeouts/promises from before will bail out.
+  currentSession++;
 
   const vc = document.querySelector('.viewers-container');
 
@@ -638,7 +704,6 @@ function selectObject(objName) {
   const assembledBlock = document.createElement('div');
   assembledBlock.style.display = 'flex';
   assembledBlock.style.flexDirection = 'column';
-  // (Removed: assembledBlock.style.flex = '2 1 600px';)
 
   const assembledCaption = document.createElement('div');
   assembledCaption.classList.add('assembled-caption');
@@ -688,7 +753,7 @@ function selectObject(objName) {
 
   // Reset frame index & begin animation/resampling loop
   currentFrameIdx = 0;
-  advanceAllFrames();
+  advanceAllFrames(currentSession);
 }
 
 // 13) HOOK UP TAB BUTTONS + “Rotate” BUTTON ONCE DOM IS READY
@@ -699,16 +764,26 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Hook up the “Rotate” button to resume auto‐rotation
+  // Hook up the “Rotate” button to toggle auto‐rotation
   const rotateBtn = document.getElementById('btn-rotate');
   rotateBtn.addEventListener('click', () => {
-    // isPaused = false;
-    allStates.forEach((st) => {
-      st.controls.autoRotate = true;
-    });
-    // Ensure the button is enabled
+    // If any viewer is currently auto‐rotating, turn them all off; otherwise, turn them all on
+    const anyAuto = allStates.some((st) => st.controls.autoRotate);
+    if (anyAuto) {
+      allStates.forEach((st) => {
+        st.controls.autoRotate = false;
+      });
+    } else {
+      allStates.forEach((st) => {
+        st.controls.autoRotate = true;
+      });
+    }
+    // Re‐enable the button (in case it was disabled while dragging)
     rotateBtn.disabled = false;
-    console.log('Resuming auto-rotation');
+    console.log('Toggled auto-rotation');
+    // Set the button text accordingly
+    const anyAuto2 = allStates.some((st) => st.controls.autoRotate);
+    rotateBtn.innerHTML = anyAuto2 ? '<i class="fas fa-sync-alt"></i> Auto Rotate: On ' : '<i class="fas fa-sync-alt"></i> Auto Rotate: Off';
   });
 
   // Show the first object by default
