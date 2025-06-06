@@ -650,32 +650,39 @@ function clearAllViewers() {
   clearTimeout(playTimeoutId);
 
   allStates.forEach((st) => {
+    // Guard: skip any state object that doesn’t have a scene
+    if (!st || !st.scene) return; // ← UPDATED: avoid calling traverse on undefined
+
     if (st.isSampled) {
       // Remove any interpolated meshes (if still present)
-      st.scene.traverse((obj) => {
-        if (obj.name && obj.name.startsWith(`interp_${st.currentSampleId}_`)) {
-          if (obj.geometry) obj.geometry.dispose();
-          if (obj.material) obj.material.dispose();
-          st.scene.remove(obj);
-        }
-      });
+    //   st.scene.traverse((obj) => {
+    //     if (obj.name && obj.name.startsWith(`interp_${st.currentSampleId}_`)) {
+    //       if (obj.geometry) obj.geometry.dispose();
+    //       if (obj.material) obj.material.dispose();
+    //       st.scene.remove(obj);
+    //     }
+    //   });
 
       // Remove each frame’s InstancedMesh
-      st.frameMeshes.forEach((m) => {
-        if (m) {
-          st.scene.remove(m);
-          m.geometry.dispose();
-          m.material.dispose();
-        }
-      });
+      if (Array.isArray(st.frameMeshes)) {
+        st.frameMeshes.forEach((m) => {
+          if (m) {
+            st.scene.remove(m);
+            if (m.geometry) m.geometry.dispose();
+            if (m.material) m.material.dispose();
+          }
+        });
+      }
 
       // Remove any trajectory spheres
-      st.trajectorySpheres.forEach((sphere) => {
-        if (sphere.geometry) sphere.geometry.dispose();
-        if (sphere.material) sphere.material.dispose();
-        st.scene.remove(sphere);
-      });
-      st.trajectorySpheres.length = 0;
+      if (Array.isArray(st.trajectorySpheres)) {
+        st.trajectorySpheres.forEach((sphere) => {
+          if (sphere.geometry) sphere.geometry.dispose();
+          if (sphere.material) sphere.material.dispose();
+          st.scene.remove(sphere);
+        });
+        st.trajectorySpheres.length = 0;
+      }
     } else {
       if (st.mesh) {
         st.scene.remove(st.mesh);
@@ -690,7 +697,12 @@ function clearAllViewers() {
     }
   });
 
-  document.querySelector('.viewers-container').innerHTML = '';
+  // Also clear out the containers in the DOM
+  const containerEl = document.querySelector('.viewers-container');
+  if (containerEl) {
+    containerEl.innerHTML = '';
+  }
+
   inputState = null;
   sampledStates = [];
   allStates = [];
@@ -1075,6 +1087,29 @@ function selectObject(objName) {
   sampledStates = [state1, state2];
   allStates = [inputState, state1, state2];
 
+  // ← NEW: Whenever we switch objects, force‐resume playback + rotation + disable trajectories
+  isPaused = false; // ensure we’re playing
+  const pauseBtn = document.getElementById('btn-pause');
+  if (pauseBtn) {
+    pauseBtn.innerText = 'Pause';
+  }
+
+  const rotateBtn = document.getElementById('btn-rotate');
+  if (rotateBtn) {
+    // Restore rotation to “On”
+    rotateBtn.innerText = 'Rotate: On';
+  }
+  // Actually enable autoRotate on every viewer’s OrbitControls
+  allStates.forEach((st) => {
+    if (st.controls) st.controls.autoRotate = true;
+  });
+
+  showTrajectories = false; // disable any lingering trajectories
+  const trajBtn = document.getElementById('btn-traj');
+  if (trajBtn) {
+    trajBtn.innerText = 'Trajectories: Off';
+  }
+
   // Reset frame index & begin animation/resampling loop
   currentFrameIdx = 0;
   advanceAllFrames(currentSession);
@@ -1092,27 +1127,29 @@ window.addEventListener('DOMContentLoaded', () => {
   // “Rotate” button toggles autoRotate:
   const rotateBtn = document.getElementById('btn-rotate');
   rotateBtn.addEventListener('click', () => {
-    const anyAuto = allStates.some((st) => st.controls.autoRotate);
+    const anyAuto = allStates.some((st) => st.controls?.autoRotate);
     if (anyAuto) {
       allStates.forEach((st) => {
-        st.controls.autoRotate = false;
+        if (st.controls) st.controls.autoRotate = false;
       });
     } else {
       allStates.forEach((st) => {
-        st.controls.autoRotate = true;
+        if (st.controls) st.controls.autoRotate = true;
       });
     }
+    // Enable the button again (in case it was disabled during drag)
     rotateBtn.disabled = false;
-    const anyAuto2 = allStates.some((st) => st.controls.autoRotate);
-    rotateBtn.innerHTML = anyAuto2
-      ? 'Rotate: On '
+
+    const anyAuto2 = allStates.some((st) => st.controls?.autoRotate);
+    rotateBtn.innerText = anyAuto2
+      ? 'Rotate: On'
       : 'Rotate: Off';
   });
 
   // “Show Trajectories” button (toggle):
   const trajBtn = document.getElementById('btn-traj');
   trajBtn.innerText = 'Trajectories: Off';     // initially off
-  trajBtn.addEventListener('click', () => {         // ← TRAJ
+  trajBtn.addEventListener('click', () => {
     showTrajectories = !showTrajectories;
     if (showTrajectories) {
       trajBtn.innerText = 'Trajectories: On';
@@ -1131,6 +1168,36 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  // ← UPDATED: “Play/Pause” button wiring (now also stops/starts autoRotate)
+  const pauseBtn = document.getElementById('btn-pause');
+  if (pauseBtn) {
+    pauseBtn.innerText = 'Pause';    // default: playing
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+
+      if (isPaused) {
+        // 1) Switch button label
+        pauseBtn.innerText = 'Play';
+        // 2) Stop the frame‐advance loop
+        clearTimeout(playTimeoutId);
+        // 3) Force all viewers to stop rotating
+        allStates.forEach((st) => {
+          if (st.controls) st.controls.autoRotate = false;
+        });
+      } else {
+        // 1) Switch button label
+        pauseBtn.innerText = 'Pause';
+        // 2) Restore autoRotate only if "Rotate" is currently set to On:
+        const rotateIsOn = rotateBtn.innerText.includes('On');
+        allStates.forEach((st) => {
+          if (st.controls) st.controls.autoRotate = rotateIsOn;
+        });
+        // 3) Re‐start frame‐advance from the current frame
+        advanceAllFrames(currentSession);
+      }
+    });
+  }
 
   // Show the first object by default
   selectObject('partnet_652');

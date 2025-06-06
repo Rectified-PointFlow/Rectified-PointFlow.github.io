@@ -248,6 +248,10 @@ body {
   position: absolute;
   right: 90px;
 }
+#btn-pause {
+  position: absolute;
+  right: 210px;
+}
 
 /* Font Awesome icon inside */
 .rotate-button i {
