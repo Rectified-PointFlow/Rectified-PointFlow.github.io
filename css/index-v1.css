@@ -215,14 +215,15 @@ body {
 }
 
 .controls-bar {
-  position: relative;
+  display: flex;
+  flex-wrap: wrap;        /* ← allow children to wrap */
+  justify-content: center; /* centers children on each line */
+  align-items: center;
   margin: 10px auto;
   width: 100%;
   max-width: 1030px;
-  display: flex;
-  justify-content: center; /* this centers the .tabs-container */
-  align-items: center;
   padding: 6px 0;
+  position: relative;
 }
 
 /* A.1) Container around just the three tabs */
@@ -232,13 +233,20 @@ body {
   /* Because .controls-bar is justify-content:center, this .tabs-container is centered */
 }
 
+.rotate-controls {
+  display: flex;
+  margin-left: auto;      /* push to the right edge of .controls-bar */
+  align-items: center;    /* vertically center buttons */
+}
+
 /* A.2) Rotate button sits at the right edge of .controls-bar */
 .rotate-button {
-  position: absolute;
-  right: 0;
+  width: 100px; /* fixed width for rotate buttons */
+  position: static; /* default position */
+  margin-left: auto; /* push to the right edge */
   background: #f5f5f5;
-  border: 0 solid #bbb;
-  border-radius: 4px;
+  border: 1px solid #bbb;
+  border-radius: 18px;
   padding: 6px 14px;
   font-size: 0.85rem;
   cursor: pointer;
@@ -246,26 +254,29 @@ body {
 }
 
 #btn-traj {
-  position: absolute;
-  right: 90px;
+  margin-left: 10px;
+  width: 140px; /* fixed width for trajectory button */
 }
 
 #btn-pause {
-  position: absolute;
-  right: 210px;
+  width: 80px; /* fixed width for pause button */
+  margin-left: 10px;
+}
+
+@media (max-width: 670px) {
+
+  .rotate-controls {
+    margin-top: 10px;         /* space above the rotate controls */
+    margin-left: 0;
+  }
 }
 
 /* Font Awesome icon inside */
 .rotate-button i {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 
 }
 
-/* Hover effect */
-.rotate-button:hover:not(:disabled) {
-    text-decoration: underline;
-
-}
 
 /* When disabled, make it semi‐transparent and cursor: default */
 .rotate-button:disabled {
@@ -278,7 +289,7 @@ body {
   border: 1px solid #bbb;
   border-radius:16px;
   padding: 6px 14px;
-  margin-left: 5px;
+  margin-left: 10px;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
@@ -292,6 +303,11 @@ body {
 .controls-bar .tab-button.active {
   background: #e0e0e0;
   border-color: #333;
+}
+
+.rotate-button:hover {
+  background: #f0f0f0;
+  border-color: #888;
 }
 
 /* ============== */
@@ -370,6 +386,7 @@ body {
 .viewer-caption hr,
 .assembled-caption hr {
   border: none;
+  width: 100%;
   border-top: 1px solid #888;
   margin: 4px 0;
 }
