@@ -1031,6 +1031,10 @@ function selectObject(objName) {
 
   const inputDiv = document.createElement('div');
   inputDiv.classList.add('viewer');
+  inputDiv.id = `input-viewer`;
+  inputDiv.style.border = '1px solid #ccc';
+  inputDiv.style.borderRadius = '8px';
+  inputDiv.style.marginTop = '15px';
   inputDiv.style.flex = '1 1 280px';
   inputWrapper.appendChild(inputDiv);
 
