@@ -10,6 +10,15 @@ const sampleMap = {
   partnet_680: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
 };
 
+// OUTSIDE—at module scope, create and reuse these:
+const _trajSphereGeo = new THREE.SphereGeometry(0.008, 6, 4);
+const _trajSphereMat = new THREE.MeshBasicMaterial({
+  transparent: true,
+  opacity: 0.4,
+  vertexColors: true,    // allows per‐instance color
+  // Because it's MeshBasicMaterial, it does NOT cast or receive shadows
+});
+
 const viewerParams = {
   partnet_78:  { groundHeight: -0.8, cameraY: 1.5  },
   partnet_652: { groundHeight: -0.85, cameraY: 1.5  },
@@ -18,7 +27,7 @@ const viewerParams = {
 
 const totalFrames   = 20;    // steps per sample
 const frameInterval = 40;    // ms per frame
-const pauseDuration = 2500;  // ms to pause at last frame
+const pauseDuration = 3000;  // ms to pause at last frame
 let slowMode = true;         // toggle “slow” vs “normal” playback
 
 // 3) HSV → RGB HELPER (unchanged)
@@ -45,20 +54,19 @@ let isPaused = false;
 let autoResample = true;
 let currentFrameIdx = 0;
 let playTimeoutId = null;
-
-// We introduce a “session” counter. Any in‐flight timeouts/promises that finish for an old session will bail out.
-let currentSession = 0;
-
-// Guard to avoid recursive sync‐calls
-let isSyncing = false;
-
-let inputState    = null;   // state for the static input viewer
-let sampledStates = [];     // states for the two sampled viewers
-let allStates     = [];     // [ inputState, ...sampledStates ]
+let currentSession = 0;         // “session stamp” to cancel stale loads/timeouts
+let isSyncing = false;          // guard for OrbitControl sync
+let inputState = null;
+let sampledStates = [];
+let allStates = [];
 
 const globalLoader = new PCDLoader();
 
-// 5) UTILITY: PICK TWO DISTINCT RANDOM SAMPLES
+// --- TRAJ GLOBALS ---
+let showTrajectories = false;    // tracks whether trajectories should be visible
+// (Each viewer state will keep its own `trajectorySpheres` array.)
+
+// 5) UTILITY: PICK TWO DISTINCT RANDOM SAMPLES (unchanged)
 function pickTwoRandomSamples(objName) {
   const arr = sampleMap[objName];
   if (!arr || arr.length < 2) {
@@ -73,7 +81,7 @@ function pickTwoRandomSamples(objName) {
   return [copy[0], copy[1]];
 }
 
-// 6) SYNC HELPERS FOR ORBITCONTROLS
+// 6) SYNC HELPERS FOR ORBITCONTROLS (unchanged)
 function syncAnglesFrom(srcControls) {
   if (isSyncing) return;
   isSyncing = true;
@@ -85,11 +93,9 @@ function syncAnglesFrom(srcControls) {
 
     allStates.forEach((st) => {
       if (st.controls === srcControls) return;
-
       const newPos = new THREE.Vector3()
         .setFromSphericalCoords(spherical.radius, spherical.phi, spherical.theta)
         .add(st.controls.target);
-
       st.camera.position.copy(newPos);
       st.camera.lookAt(st.controls.target);
       st.controls.update();
@@ -99,7 +105,7 @@ function syncAnglesFrom(srcControls) {
   }
 }
 
-// 7) INITIALIZE A STATIC INPUT VIEWER (colored by label)
+// 7) INITIALIZE A STATIC INPUT VIEWER (colored by label) (unchanged)
 function initInputViewer(container, objName) {
   const width  = container.clientWidth;
   const height = container.clientHeight;
@@ -134,7 +140,7 @@ function initInputViewer(container, objName) {
   dirLight.shadow.camera.bottom = -10;
   scene.add(dirLight);
 
-  // Handle resize
+  // Handle window resize
   window.addEventListener('resize', () => {
     const w = container.clientWidth;
     const h = container.clientHeight;
@@ -158,7 +164,6 @@ function initInputViewer(container, objName) {
   controls.autoRotateSpeed = 2;
   controls.update();
 
-  // Track whether user is currently dragging
   controls.userIsInteracting = false;
   controls.domElement.addEventListener('mousedown', () => {
     controls.userIsInteracting = true;
@@ -168,15 +173,12 @@ function initInputViewer(container, objName) {
   });
 
   controls.addEventListener('start', () => {
-    // Disable auto‐rotate on all when any viewer is dragged
     allStates.forEach((st) => {
       st.controls.autoRotate = false;
     });
-    // Disable the Rotate button itself
     document.getElementById('btn-rotate').disabled = true;
   });
   controls.addEventListener('end', () => {
-    // Re‐enable auto‐rotate on all once dragging ends if the button text is still “On”
     const rotateBtn = document.getElementById('btn-rotate');
     const isAutoRotate = rotateBtn.innerHTML.includes(': On');
     document.getElementById('btn-rotate').disabled = false;
@@ -184,7 +186,6 @@ function initInputViewer(container, objName) {
     allStates.forEach((st) => {
       st.controls.autoRotate = true;
     });
-    // Sync final angles into others
     syncAnglesFrom(controls);
   });
   controls.addEventListener('change', () => {
@@ -211,7 +212,7 @@ function initInputViewer(container, objName) {
       const positions = posAttr.array;
       const N = positions.length / 3;
       const labels = lblAttr ? lblAttr.array : null;
-      const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+      const sphereGeo = new THREE.SphereGeometry(0.01, 6, 4);
       const mat = new THREE.MeshStandardMaterial({
         transparent: true,
         metalness: 0.2,
@@ -266,7 +267,7 @@ function initInputViewer(container, objName) {
     }
   );
 
-  const state = {
+  return {
     container,
     scene,
     camera,
@@ -275,7 +276,6 @@ function initInputViewer(container, objName) {
     mesh: null,
     isSampled: false
   };
-  return state;
 }
 
 // 8) INITIALIZE A “SAMPLED” VIEWER (20‐frame animation)
@@ -322,7 +322,7 @@ function initSampledViewer(container, objName, initialSampleId) {
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // Handle resize
+  // Handle window resize
   window.addEventListener('resize', () => {
     const w = container.clientWidth;
     const h = container.clientHeight;
@@ -373,12 +373,15 @@ function initSampledViewer(container, objName, initialSampleId) {
     }
   });
 
-  // Prepare array for 20 frames
+  // Prepare arrays for 20 frames
   const frameMeshes = new Array(totalFrames).fill(null);
   const framePositions = new Array(totalFrames).fill(null);
-  let N_points = 0;  // will be set once frame 0 loads
+  let N_points = 0;  // will be known once frame 0 loads
 
-  // Assign this state's “session stamp”
+  // Keep track of trajectory spheres so we can remove them later
+  const trajectorySpheres = [];         // ← TRAJ
+
+  // Assign this state’s “session stamp”
   const mySession = currentSession;
 
   const state = {
@@ -393,7 +396,8 @@ function initSampledViewer(container, objName, initialSampleId) {
     currentSampleId: null,
     loadingOverlay: loading,
     isSampled: true,
-    session: mySession
+    session: mySession,
+    trajectorySpheres             // ← TRAJ
   };
 
   // Helper: pick a random sample ≠ current
@@ -407,13 +411,13 @@ function initSampledViewer(container, objName, initialSampleId) {
     return choice;
   }
 
-  // Helper: build a new InstancedMesh at the midpoint of two loaded frames
+  // Helper: build an interpolated InstancedMesh for frames (unchanged)
   function buildInterpolatedMesh(t0, t1) {
     const pos0 = state.framePositions[t0];
     const pos1 = state.framePositions[t1];
     if (!pos0 || !pos1) return null;
 
-    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 4);
     const mat = new THREE.MeshStandardMaterial({
       transparent: true,
       metalness: 0.2,
@@ -461,8 +465,8 @@ function initSampledViewer(container, objName, initialSampleId) {
     return mesh;
   }
 
+  // Helper: load all frames for a sample (unchanged except return)
   async function loadSample(sampleId, showLoading = false) {
-    // If this viewer’s session is stale, bail immediately.
     if (state.session !== currentSession) return null;
 
     if (showLoading) {
@@ -591,6 +595,7 @@ function initSampledViewer(container, objName, initialSampleId) {
     if (showLoading) {
       state.loadingOverlay.style.display = 'none';
 
+      // Dispose old frame‐meshes:
       state.frameMeshes.forEach((oldMesh) => {
         if (oldMesh) {
           state.scene.remove(oldMesh);
@@ -599,6 +604,7 @@ function initSampledViewer(container, objName, initialSampleId) {
         }
       });
 
+      // Swap in the new
       state.frameMeshes = newMeshes;
       state.framePositions = newPositions;
       state.currentSampleId = sampleId;
@@ -617,7 +623,7 @@ function initSampledViewer(container, objName, initialSampleId) {
   state.pickRandom = pickRandomSample;
   state.loadSample = loadSample;
 
-  // Immediately start the first load, and show frame 0 once it finishes.
+  // Initially load the first sample and show frame 0
   loadSample(initialSampleId, true);
 
   return state;
@@ -640,14 +646,21 @@ function initSampledViewer(container, objName, initialSampleId) {
 
 // 9) TEARDOWN: CLEAR ALL VIEWERS (disposing Three.js objects)
 function clearAllViewers() {
-  // Force any in‐flight advanceAllFrames to bail
-  currentSession++;
-
-  // Clear the one outstanding timeout for advanceAllFrames
+  currentSession++;           // bump session so in‐flight promises bail
   clearTimeout(playTimeoutId);
 
   allStates.forEach((st) => {
     if (st.isSampled) {
+      // Remove any interpolated meshes (if still present)
+      st.scene.traverse((obj) => {
+        if (obj.name && obj.name.startsWith(`interp_${st.currentSampleId}_`)) {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) obj.material.dispose();
+          st.scene.remove(obj);
+        }
+      });
+
+      // Remove each frame’s InstancedMesh
       st.frameMeshes.forEach((m) => {
         if (m) {
           st.scene.remove(m);
@@ -655,7 +668,14 @@ function clearAllViewers() {
           m.material.dispose();
         }
       });
-      // Note: Interpolated meshes will be garbage‐collected if not explicitly removed.
+
+      // Remove any trajectory spheres
+      st.trajectorySpheres.forEach((sphere) => {
+        if (sphere.geometry) sphere.geometry.dispose();
+        if (sphere.material) sphere.material.dispose();
+        st.scene.remove(sphere);
+      });
+      st.trajectorySpheres.length = 0;
     } else {
       if (st.mesh) {
         st.scene.remove(st.mesh);
@@ -663,6 +683,7 @@ function clearAllViewers() {
         if (st.mesh.material) st.mesh.material.dispose();
       }
     }
+
     if (st.renderer && st.renderer.domElement) {
       st.container.removeChild(st.renderer.domElement);
       st.renderer.dispose();
@@ -688,6 +709,7 @@ function advanceAllFrames(session) {
     const prevMap = mapGlobalToLocal(prevG, st);
     const currMap = mapGlobalToLocal(g, st);
 
+    // Hide whatever was visible at prevG:
     if (prevMap.isOriginal) {
       const oldIdx = prevMap.frameIndex;
       if (st.frameMeshes[oldIdx]) st.frameMeshes[oldIdx].visible = false;
@@ -697,6 +719,7 @@ function advanceAllFrames(session) {
       if (obj) obj.visible = false;
     }
 
+    // Show whatever should be visible at g:
     if (currMap.isOriginal) {
       const idx = currMap.frameIndex;
       if (st.frameMeshes[idx]) st.frameMeshes[idx].visible = true;
@@ -715,77 +738,89 @@ function advanceAllFrames(session) {
   });
 
   if (g === globalTotal - 1) {
-    if (autoResample) {
-      playTimeoutId = setTimeout(async () => {
-        if (session !== currentSession) return;
+    // At the last frame: start prefetching new samples immediately
+    const curr0 = sampledStates[0].currentSampleId;
+    const curr1 = sampledStates[1].currentSampleId;
 
-        // 1) Get each viewer’s current sample ID
-        const curr0 = sampledStates[0].currentSampleId;
-        const curr1 = sampledStates[1].currentSampleId;
+    let newId0;
+    do {
+      newId0 = sampledStates[0].pickRandom();
+    } while (newId0 === curr1);
 
-        // 2) Pick a new ID for viewer 0 (≠ curr0 and ≠ curr1)
-        let newId0;
-        do {
-          newId0 = sampledStates[0].pickRandom();
-        } while (newId0 === curr1);
+    let newId1;
+    do {
+      newId1 = sampledStates[1].pickRandom();
+    } while (newId1 === curr0 || newId1 === newId0);
 
-        // 3) Pick a new ID for viewer 1 (≠ curr1, ≠ curr0, and ≠ newId0)
-        let newId1;
-        do {
-          newId1 = sampledStates[1].pickRandom();
-        } while (newId1 === curr0 || newId1 === newId0);
+    // Kick off prefetch (showLoading=false)
+    const prefetchPromise0 = sampledStates[0].loadSample(newId0, false);
+    const prefetchPromise1 = sampledStates[1].loadSample(newId1, false);
 
-        // 4) Kick off BOTH loadSample calls with showLoading=false,
-        //    and capture their return values so we can swap them in:
-        const [res0, res1] = await Promise.all([
-          sampledStates[0].loadSample(newId0, false),
-          sampledStates[1].loadSample(newId1, false)
-        ]);
+    // Wait pauseDuration, then swap everything in one go
+    playTimeoutId = setTimeout(async () => {
+      if (session !== currentSession) return;
+      const [res0, res1] = await Promise.all([prefetchPromise0, prefetchPromise1]);
+      if (session !== currentSession) return;
 
-        // 5) If session changed during loading, bail out:
-        if (session !== currentSession) return;
+      // For each sampled viewer, remove old trajectories & old meshes before swapping
+      [res0, res1].forEach((res, i) => {
+        const st = sampledStates[i];
+        if (!res) return;
 
-        // 6) For each viewer, dispose old meshes and swap in the new ones:
-        [res0, res1].forEach((res, i) => {
-          const st = sampledStates[i];
-          if (!res) return; // in case loadSample bailed
+        // Remove & dispose ALL interpolated meshes (any name starting with 'interp_<oldSampleId>_')
+        const toRemove = [];
+        st.scene.traverse((obj) => {
+          if (obj.name && obj.name.startsWith(`interp_${st.currentSampleId}_`)) {
+            toRemove.push(obj);
+          }
+        });
+        toRemove.forEach((obj) => {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) obj.material.dispose();
+          st.scene.remove(obj);
+        });
 
-          // 6a) Remove and dispose old meshes from the scene:
-          st.frameMeshes.forEach((oldMesh) => {
-            if (oldMesh) {
-              st.scene.remove(oldMesh);
-              oldMesh.geometry.dispose();
-              oldMesh.material.dispose();
-            }
-          });
-
-          // 6b) Swap in:
-          st.frameMeshes = res.newMeshes;
-          st.framePositions = res.newPositions;
-          st.currentSampleId = res.sampleId;
-
-          // 6c) Show frame 0 of the new sample immediately:
-          if (st.frameMeshes[0]) {
-            st.frameMeshes[0].visible = true;
+        // Remove & dispose old frame‐meshes
+        st.frameMeshes.forEach((oldMesh) => {
+          if (oldMesh) {
+            st.scene.remove(oldMesh);
+            oldMesh.geometry.dispose();
+            oldMesh.material.dispose();
           }
         });
 
-        // 7) Now restart from frame 0, if still valid
-        if (!isPaused) {
-          currentFrameIdx = 0;
-          advanceAllFrames(session);
+        // ← TRAJ: Remove any trajectory spheres for the old sample
+        st.trajectorySpheres.forEach((sphere) => {
+          if (sphere.geometry) sphere.geometry.dispose();
+          if (sphere.material) sphere.material.dispose();
+          st.scene.remove(sphere);
+        });
+        st.trajectorySpheres.length = 0;
+
+        // Swap in the newly-loaded frames & positions
+        st.frameMeshes = res.newMeshes;
+        st.framePositions = res.newPositions;
+        st.currentSampleId = res.sampleId;
+
+        // Show frame 0 of the new sample
+        if (st.frameMeshes[0]) {
+          st.frameMeshes[0].visible = true;
         }
-      }, pauseDuration);
-    } else {
-      playTimeoutId = setTimeout(() => {
-        if (session !== currentSession) return;
-        if (!isPaused) {
-          currentFrameIdx = 0;
-          advanceAllFrames(session);
+
+        // ← TRAJ: If the toggle is ON, immediately draw new spheres for the new sample
+        if (showTrajectories) {
+          drawTrajectoriesForState(st);
         }
-      }, pauseDuration);
-    }
+      });
+
+      // 7) Restart from frame 0 if still playing
+      if (!isPaused) {
+        currentFrameIdx = 0;
+        advanceAllFrames(session);
+      }
+    }, pauseDuration);
   } else {
+    // Normal case: simply advance to g+1 after frameInterval
     playTimeoutId = setTimeout(() => {
       if (session !== currentSession) return;
       if (!isPaused) {
@@ -810,14 +845,14 @@ function advanceAllFrames(session) {
     }
   }
 
-  // Helper to build (and name) the interpolated mesh in `st` for indices (i0, i1).
+  // Helper: build (and name) an interpolated mesh in `st` for indices (i0, i1) (unchanged)
   function buildInterpolatedMeshForState(st, i0, i1, globalIdx) {
     const name = `interp_${st.currentSampleId}_${i0}_${i1}_${globalIdx}`;
     const pos0 = st.framePositions[i0];
     const pos1 = st.framePositions[i1];
     if (!pos0 || !pos1) return null;
 
-    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 6);
+    const sphereGeo = new THREE.SphereGeometry(0.01, 6, 4);
     const mat = new THREE.MeshStandardMaterial({
       transparent: true,
       metalness: 0.2,
@@ -857,17 +892,105 @@ function advanceAllFrames(session) {
   }
 }
 
-// 11) RENDER LOOP (calls controls.update + render each scene)
+// 11) RENDER LOOP (calls controls.update + render each scene) (unchanged)
 function animateAll() {
   requestAnimationFrame(animateAll);
-
   allStates.forEach((st) => {
     st.controls.update();
     st.renderer.render(st.scene, st.camera);
   });
 }
 
-// 12) BUILD VIEWERS WHEN A TAB IS CLICKED
+// 12) DRAW TRAJECTORIES FOR ONE VIEWER STATE (sampled viewer only) ← TRAJ
+function drawTrajectoriesForState(st) {
+  const N = st.N_points;
+  if (N === 0 || !st.framePositions[0]) return;
+
+  // 1) Pick 5% of indices at random
+  const numToSample = Math.max(1, Math.floor(N * 0.07));
+  const indices = new Set();
+  while (indices.size < numToSample) {
+    indices.add(Math.floor(Math.random() * N));
+  }
+  const selectedIndices = Array.from(indices);
+
+  // 2) We will have totalInstances = numToSample * totalFrames
+  const totalInstances = numToSample * totalFrames;
+  const instancedMesh = new THREE.InstancedMesh(
+    _trajSphereGeo,
+    _trajSphereMat,
+    totalInstances
+  );
+  // Enable per‐instance color
+  instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(
+    new Float32Array(totalInstances * 3),
+    3
+  );
+  instancedMesh.count = totalInstances; // yep, exactly this many
+  instancedMesh.castShadow = false;
+  instancedMesh.receiveShadow = false;
+
+  // 3) Fill in each instance’s matrix and color
+  const dummyMatrix = new THREE.Matrix4();
+  const color = new THREE.Color();
+
+  let instanceIdx = 0;
+  for (let pi = 0; pi < selectedIndices.length; pi++) {
+    const ptIdx = selectedIndices[pi];
+
+    // Pre‐grab colorSeries[ptIdx] for all frames if you want—this avoids
+    // re‐reading instanceColor on each frame. But we can just read from meshAtT.instanceColor as below.
+    for (let t = 0; t < totalFrames; t++) {
+      const posArr = st.framePositions[t]; // Float32Array length=N*3
+      const x = posArr[3 * ptIdx];
+      const y = posArr[3 * ptIdx + 1];
+      const z = posArr[3 * ptIdx + 2];
+
+      // Build translation for this instance
+      dummyMatrix.makeTranslation(x, y, z);
+      instancedMesh.setMatrixAt(instanceIdx, dummyMatrix);
+
+      // Determine the color from the original instanced‐mesh at frame t
+      const meshAtT = st.frameMeshes[t];
+      if (meshAtT.instanceColor) {
+        const cA = meshAtT.instanceColor;
+        const r = cA.getX(ptIdx);
+        const g = cA.getY(ptIdx);
+        const b = cA.getZ(ptIdx);
+        color.setRGB(r, g, b);
+      } else {
+        color.setRGB(0.5, 0.5, 0.5);
+      }
+      instancedMesh.setColorAt(instanceIdx, color);
+
+      instanceIdx++;
+    }
+  }
+
+  // Make sure the InstancedMesh knows its colors were updated
+  instancedMesh.instanceColor.needsUpdate = true;
+  instancedMesh.instanceMatrix.needsUpdate = true;
+
+  // 4) Add the single InstancedMesh to the scene
+  st.scene.add(instancedMesh);
+
+  // 5) Push it into st.trajectorySpheres so the teardown logic still works
+  // (Later, removeTrajectoriesForState can simply loop over trajectorySpheres,
+  //  dispose geometry/material, and scene.remove(obj).)
+  st.trajectorySpheres.push(instancedMesh);
+}
+
+// 13) REMOVE ALL TRAJECTORIES FOR ONE VIEWER STATE ← TRAJ
+function removeTrajectoriesForState(st) {
+  st.trajectorySpheres.forEach((sphere) => {
+    if (sphere.geometry) sphere.geometry.dispose();
+    if (sphere.material) sphere.material.dispose();
+    st.scene.remove(sphere);
+  });
+  st.trajectorySpheres.length = 0;
+}
+
+// 14) BUILD VIEWERS WHEN A TAB IS CLICKED
 function selectObject(objName) {
   // 1) Tear down anything from the last session
   clearAllViewers();
@@ -877,7 +1000,7 @@ function selectObject(objName) {
     btn.classList.toggle('active', btn.dataset.obj === objName);
   });
 
-  // 3) Increment session so that any in‐flight timeouts/promises from before will bail out.
+  // 3) Increment session so old loads/timeouts bail
   currentSession++;
 
   const vc = document.querySelector('.viewers-container');
@@ -950,7 +1073,6 @@ function selectObject(objName) {
   const state1 = initSampledViewer(sampleDiv1, objName, id1);
   const state2 = initSampledViewer(sampleDiv2, objName, id2);
   sampledStates = [state1, state2];
-
   allStates = [inputState, state1, state2];
 
   // Reset frame index & begin animation/resampling loop
@@ -958,15 +1080,16 @@ function selectObject(objName) {
   advanceAllFrames(currentSession);
 }
 
-// 13) HOOK UP TAB BUTTONS + “Rotate” BUTTON ONCE DOM IS READY
+// 15) HOOK UP TAB BUTTONS + TOGGLE BUTTONS ONCE DOM IS READY
 window.addEventListener('DOMContentLoaded', () => {
+  // Tab buttons:
   document.querySelectorAll('.tab-button').forEach((btn) => {
     btn.addEventListener('click', () => {
       selectObject(btn.dataset.obj);
     });
   });
 
-  // Hook up the “Rotate” button to toggle auto‐rotation
+  // “Rotate” button toggles autoRotate:
   const rotateBtn = document.getElementById('btn-rotate');
   rotateBtn.addEventListener('click', () => {
     const anyAuto = allStates.some((st) => st.controls.autoRotate);
@@ -982,8 +1105,31 @@ window.addEventListener('DOMContentLoaded', () => {
     rotateBtn.disabled = false;
     const anyAuto2 = allStates.some((st) => st.controls.autoRotate);
     rotateBtn.innerHTML = anyAuto2
-      ? '<i class="fas fa-sync-alt"></i> Auto Rotate: On '
-      : '<i class="fas fa-sync-alt"></i> Auto Rotate: Off';
+      ? 'Rotate: On '
+      : 'Rotate: Off';
+  });
+
+  // “Show Trajectories” button (toggle):
+  const trajBtn = document.getElementById('btn-traj');
+  trajBtn.innerText = 'Trajectories: Off';     // initially off
+  trajBtn.addEventListener('click', () => {         // ← TRAJ
+    showTrajectories = !showTrajectories;
+    if (showTrajectories) {
+      trajBtn.innerText = 'Trajectories: On';
+      // Draw trajectories for each sampled viewer if frames are already loaded:
+      sampledStates.forEach((st) => {
+        const allLoaded = st.framePositions.every((arr) => arr !== null);
+        if (allLoaded) {
+          drawTrajectoriesForState(st);
+        }
+      });
+    } else {
+      trajBtn.innerText = 'Trajectories: Off';
+      // Remove any existing trajectories
+      sampledStates.forEach((st) => {
+        removeTrajectoriesForState(st);
+      });
+    }
   });
 
   // Show the first object by default
