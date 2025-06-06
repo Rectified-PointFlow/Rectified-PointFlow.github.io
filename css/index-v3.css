@@ -1,0 +1,510 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+
+.footer .icon-link {
+    font-size: 25px;
+    color: #000;
+}
+
+.link-block a {
+    margin-top: 8px;
+    margin-left: 2px;
+    margin-right: 2px;
+    min-width: 120px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #888;
+}
+.link-block a:hover {
+    background-color: #f0f0f0;
+    border: 1px solid #333;
+}
+
+.methodname {
+  /* font-variant: small-caps; */
+    font-weight: 600;
+}
+
+.emph {
+    font-style: italic;
+}
+
+.teaser .hero-body {
+  padding-top: 0;
+  /* padding-bottom: 1rem; */
+  min-width: 100px;
+  margin-bottom: 1rem;
+  margin-bottom: 0;
+  align-items: center;
+    justify-content: center;
+}
+
+.teaser {
+  font-family: 'Google Sans', sans-serif;
+}
+
+
+.publication-title {
+}
+
+.publication-banner {
+  max-height: parent;
+
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-header .hero-body {
+}
+
+.publication-title {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-authors {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-venue {
+    color: #555;
+    width: fit-content;
+    font-weight: bold;
+}
+
+.publication-awards {
+    color: #ff3860;
+    width: fit-content;
+    font-weight: bolder;
+}
+
+.publication-authors {
+}
+
+.publication-authors a {
+   color: hsl(204, 86%, 53%) !important;
+}
+
+.publication-authors a:hover {
+    text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+.publication-banner img {
+}
+
+.publication-authors {
+  /*color: #4286f4;*/
+}
+
+.publication-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+
+    overflow: hidden;
+    border-radius: 10px !important;
+}
+
+.publication-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.publication-body img {
+}
+
+.results-carousel {
+    visibility: hidden;
+    overflow: hidden;
+    width: 100%;
+    max-height: 0;
+}
+
+.results-carousel .oneitem {
+    background-color: #bbb;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 70px);
+    margin-top: 0;
+    margin-left: 5px;
+    margin-right: 5px;
+    overflow: hidden;
+    border: 1px solid #bbb;
+    border-radius: 13px;
+    padding: 0;
+    font-size: 0;
+    max-height: 560px;
+    overflow-y: auto;
+}
+
+.results-carousel .twoitem {
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    margin-bottom: 56px;
+    margin-left: 5px;
+    margin-right: 5px;
+    overflow: hidden;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    padding: 0;
+    font-size: 0;
+}
+
+#results-carousel-teaser .twentytwenty-container {
+    aspect-ratio: 32 / 9;
+}
+
+#results-carousel-horizontal .twentytwenty-container {
+    aspect-ratio: 4 / 3;
+}
+
+#results-carousel-vertical .twentytwenty-container {
+    aspect-ratio: 0.75;
+}
+
+.slider-navigation-previous {
+    top: calc(50% - 28px);
+    left: calc(0% + 15px);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 1);
+}
+
+.slider-navigation-next {
+    top: calc(50% - 28px);
+    left: calc(100% - 15px - 42px);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 1);
+}
+
+.slider-pagination {
+    top: calc(100% - 56px);
+    display: inline-block;
+}
+
+.slider-pagination .slider-page {
+    background-color: #FFF;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 1);
+    display: inline-block;
+}
+
+.selectable{
+    -webkit-touch-callout: all; /* iOS Safari */
+    -webkit-user-select: all; /* Safari */
+    -khtml-user-select: all; /* Konqueror HTML */
+    -moz-user-select: all; /* Firefox */
+    -ms-user-select: all; /* Internet Explorer/Edge */
+    user-select: all; /* Chrome and Opera */
+}
+
+.controls-bar {
+  display: flex;
+  flex-wrap: wrap;        /* ← allow children to wrap */
+  justify-content: center; /* centers children on each line */
+  align-items: center;
+  margin: 10px auto;
+  width: 100%;
+  max-width: 1030px;
+  padding: 6px 0;
+  position: relative;
+}
+
+/* A.1) Container around just the three tabs */
+.tabs-container {
+  display: flex;
+  gap: 12px;
+  /* Because .controls-bar is justify-content:center, this .tabs-container is centered */
+}
+
+.rotate-controls {
+  display: flex;
+  margin-left: auto;      /* push to the right edge of .controls-bar */
+  align-items: center;    /* vertically center buttons */
+}
+
+/* A.2) Rotate button sits at the right edge of .controls-bar */
+.rotate-button {
+  width: 100px; /* fixed width for rotate buttons */
+  position: static; /* default position */
+  margin-left: auto; /* push to the right edge */
+  background: #f5f5f5;
+  border: 1px solid #bbb;
+  border-radius: 18px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+#btn-traj {
+  margin-left: 10px;
+  width: 140px; /* fixed width for trajectory button */
+}
+
+#btn-pause {
+  width: 80px; /* fixed width for pause button */
+  margin-left: 10px;
+}
+
+@media (max-width: 670px) {
+
+  .rotate-controls {
+    margin-top: 10px;         /* space above the rotate controls */
+    margin-left: 0;
+  }
+}
+
+/* Font Awesome icon inside */
+.rotate-button i {
+  font-size: 0.95rem;
+
+}
+
+
+/* When disabled, make it semi‐transparent and cursor: default */
+.rotate-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.controls-bar .tab-button {
+  background: #ffffff;
+  border: 1px solid #bbb;
+  border-radius:16px;
+  padding: 6px 14px;
+  margin-left: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.controls-bar .tab-button:hover {
+  background: #f0f0f0;
+  border-color: #888;
+}
+
+.controls-bar .tab-button.active {
+  background: #e0e0e0;
+  border-color: #333;
+}
+
+.rotate-button:hover {
+  background: #f0f0f0;
+  border-color: #888;
+}
+
+/* ============== */
+/* VIEWERS LAYOUT */
+/* ============== */
+
+/* Container holding all three “blocks” side by side (and wrapping) */
+.viewers-container {
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 5px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1050px;
+}
+
+/* Each individual viewer box */
+.viewer {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  flex: 1 1 320px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+/* “Loading…” overlay inside each viewer */
+.viewer .loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(245, 245, 245, 0.85);
+  color: #333;
+  font-family: sans-serif;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+}
+
+/* Small caption above each viewer */
+.viewer-caption {
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 4px;
+  text-align: center;
+  width: 100%;
+}
+
+/* ============== */
+/* ASSEMBLED BOX  */
+/* ============== */
+/* General style for any “two‐line” viewer caption */
+.viewer-caption,
+.assembled-caption {
+  font-family: sans-serif;
+  font-size: 1.1rem;
+    font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* The <hr> between lines */
+.viewer-caption hr,
+.assembled-caption hr {
+  border: none;
+  width: 100%;
+  /* border-top: 1px solid #888; */
+  margin: 0px 0;
+}
+
+/* Sub‐caption text (second line) slightly smaller and lighter */
+.viewer-subcaption,
+.assembled-subcaption {
+  display: block;
+  font-size: 1.0rem;
+  color: #666;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 5px;;
+}
+
+
+/* A wrapper around the two “sampled” viewers */
+.assembled-container {
+  display: flex;
+  flex-wrap: wrap;       /* allow the two sampled to wrap within this box */
+  justify-content: center; /* center the two sampled viewers */
+  gap: 15px;
+  /* flex: 2 1 600px;       try to keep the two side by side, but shrink if needed */
+  /* border: 1px solid #bbb; */
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+  background: #fcfcfc;
+  width: 100%;
+}
+
+/* ─── PARENT CONTAINER ─── */
+.slider-container {
+  display: flex;
+  flex-direction: column;   /* stack the canvas‐row and the info‐bar vertically */
+  align-items: center;      /* center children horizontally */
+  width: 90%;               /* 90% of parent’s width (as before) */
+  margin: 1rem auto;        /* optional: add some vertical spacing between containers */
+  box-sizing: border-box;
+}
+
+/* ─── CANVAS ROW (three blocks side by side) ─── */
+.canvas-row {
+    display: flex;            /* use flexbox to align three canvases side by side */
+  justify-content: center;
+  align-items: center; /* center the canvases vertically */
+  width: 100%;
+  margin-bottom: 1rem;            /* spacing between canvases and info bar */
+  gap: 1rem;                       /* equal gap between each block */
+}
+
+/* Each block holds one canvas + caption */
+.slider-block {
+  flex: 1;                 /* each block takes equal share of available width */
+  text-align: center;
+}
+
+/* Make sure each <canvas> itself doesn’t overflow its parent.
+   You can adjust max-width if you want responsive resizing. */
+.slider-block canvas {
+  width: 100%;             /* scale to fill the block’s width */
+  min-width: 150px;
+  height: auto;            /* keep aspect ratio */
+  border-radius: 8px;      /* as before */
+  display: block;
+  margin: 0 auto;
+}
+
+/* Caption under each canvas */
+.slider-caption {
+  color: #000;
+  margin-top: 0.5rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  min-height: 2.2rem;       /* reserve vertical space even if text changes */
+}
+
+/* ─── INFO BAR: holds “s = …” and slider ─── */
+.info-bar {
+  display: flex;
+  justify-content: center;    /* center both children horizontally */
+  align-items: center;        /* vertically align the text & slider */
+  max-width: 400px;
+  width: 100%;                /* full width of the parent container */
+  gap: 1rem;                  /* space between “s=…” and the slider */
+  background: #f5f5f5;
+  /* border: 1px solid #ddd; */
+  border-radius: 18px;
+  height: 36px;;
+}
+
+/* The “s = …” text */
+.s-display {
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* The <span> that actually updates */
+.s-value {
+    min-width: 120px; /* reserve space for the value */
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* ─── SLIDER STYLING ─── */
+/* You can adjust width to your liking or switch to % */
+.frame-slider {
+  width: calc(100% - 110px); /* fill remaining space in .info-bar */
+  max-width: 400px;     /* prevent it from growing too large */
+  /* You can add custom track/thumb styles here if desired */
+}
+
+/* OPTIONAL: when the window is very narrow, shrink the three canvases proportionally */
+@media (max-width: 600px) {
+  .canvas-row {
+    flex-direction: column;    /* stack canvases vertically on small screens */
+    gap: 1.5rem;
+  }
+}
