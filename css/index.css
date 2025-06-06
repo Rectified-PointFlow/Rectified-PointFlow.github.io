@@ -244,10 +244,12 @@ body {
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
+
 #btn-traj {
   position: absolute;
   right: 90px;
 }
+
 #btn-pause {
   position: absolute;
   right: 210px;
