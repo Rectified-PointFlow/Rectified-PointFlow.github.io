@@ -92,100 +92,96 @@
   </head>
 
   <body>
-    <section class="hero">
+    <section class="hero is-landing">
       <div class="hero-body">
         <div class="container is-max-desktop">
-          <div class="columns is-centered">
-            <div class="column has-text-centered">
-              <!-- <h2 class="title is-2 publication-title"> <strong><span style="color: #006400">R</span><span style="color: #006666">e</span><span style="color: #006D6D">S</span><span style="color: #007373">t</span><span style="color: #007979">y</span><span style="color: #008080">l</span><span style="color: #008686">e</span><span style="color: #008B8B">3</span><span style="color: #009090">D</span></strong></h2> -->
+          <div class="landing-card">
+            <div class="landing-intro">
               <h1 class="title is-2 publication-title">
-               Rectified Point Flow: <br> Generic Point Cloud Pose Estimation
+                Rectified Point Flow: <br />
+                Generic Point Cloud Pose Estimation
               </h1>
-              <div style="text-align: center; line-height: 1.6; font-size: 1.2em;">
-                <span style="margin-left: 10px;"><a href="https://taosun.io/">Tao Sun</a><sup>1,*</sup></span> 
-                <span><a href="https://www.zhuliyuan.net/">Liyuan Zhu</a><sup>1,*</sup></span> 
-                <span style="margin-left: 10px;"><a href="https://shengyuh.github.io/">Shengyu Huang</a><sup>2</sup></span>
-                <!-- <br> -->
-                <span style="margin-left: 10px;"><a href="https://shurans.github.io/">Shuran Song</a><sup>1</sup></span> 
-                <span style="margin-left: 10px;"><a href="https://ir0.github.io/">Iro Armeni</a><sup>1</sup></span>
-                <br>
-                <span><sup>1</sup>Stanford University</span> 
-                <span style="margin-left: 12px;"><sup>2</sup>NVIDIA Research</span> 
-                <br>
-                <span style="font-size: .85em;"><sup>*</sup>Equal contribution</span>
-            </div>
-              <!-- Buttons -->
-              <div class="column has-text-centered">
-                <div class="publication-links">
-                  <span class="link-block">
-                    <a
-                      href="https://arxiv.org/abs/2506.05282"
-                      rel="noopener noreferrer"
-                      class="external-link button is-normal is-rounded"
-                    >
-                      <span class="icon">
-                        <i class="fas fa-file-pdf" style="color: orangered"></i>
-                      </span>
-                      <span>Paper</span>
-                    </a>
-                  </span>
-                  <!-- Code Link. -->
-                  <span class="link-block">
-                    <a
-                      href="https://github.com/GradientSpaces/Rectified-Point-Flow"
-                      rel="noopener noreferrer"
-                      class="external-link button is-normal is-rounded"
-                    >
-                      <span class="icon">
-                        <i class="fab fa-github"></i>
-                      </span>
-                      <span>Code</span>
-                    </a>
-                  </span>
-                  <!-- Hugging Face Space -->
-                  <style>
-                    .link-block a.button.is-dark.disabled {
-                      background-color: #4a4a4a;
-                      opacity: 0.8;
-                      cursor: not-allowed;
-                      pointer-events: none;
-                    }
-                  </style>
-                  <span class="link-block">
-                    <a
-                      href="https://huggingface.co/gradient-spaces/"
-                      rel="noopener noreferrer"
-                      class="external-link button is-normal is-rounded"
-                    >
-                      <span class="icon">&#129303;</span>
-                      <span>Model</span>
-                    </a>
-                  </span>
-                  <span class="link-block">
+              <p class="subtitle hero-subtitle">
+                A unified rectified flow that assembles unposed parts into coherent shapes and recovers precise poses from point clouds.
+              </p>
+              <div class="publication-links hero-links">
+                <span class="link-block">
+                  <a
+                    href="https://arxiv.org/abs/2506.05282"
+                    rel="noopener noreferrer"
+                    class="external-link button is-normal is-rounded"
+                  >
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a
+                    href="https://github.com/GradientSpaces/Rectified-Point-Flow"
+                    rel="noopener noreferrer"
+                    class="external-link button is-normal is-rounded"
+                  >
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a
+                    href="https://huggingface.co/gradient-spaces/"
+                    rel="noopener noreferrer"
+                    class="external-link button is-normal is-rounded"
+                  >
+                    <span class="icon">&#129303;</span>
+                    <span>Model</span>
+                  </a>
+                </span>
+                <span class="link-block">
                   <a
                     href="https://huggingface.co/gradient-spaces/"
                     rel="noopener noreferrer"
                     class="external-link button is-normal is-rounded"
                   >
                     <span class="icon">
-                      <img src="./images/dataset-icon.svg" alt="Dataset icon" width="16" height="16">
+                      <img src="./images/dataset-icon.svg" alt="Dataset icon" width="16" height="16" />
                     </span>
                     <span>Dataset</span>
                   </a>
                 </span>
-                </div>
               </div>
             </div>
+            <div class="authors-block">
+              <div class="authors-list">
+                <span class="author"><a href="https://taosun.io/">Tao Sun</a><sup>1,*</sup></span>
+                <span class="author"><a href="https://www.zhuliyuan.net/">Liyuan Zhu</a><sup>1,*</sup></span>
+                <span class="author"><a href="https://shengyuh.github.io/">Shengyu Huang</a><sup>2</sup></span>
+                <span class="author"><a href="https://shurans.github.io/">Shuran Song</a><sup>1</sup></span>
+                <span class="author"><a href="https://ir0.github.io/">Iro Armeni</a><sup>1</sup></span>
+              </div>
+              <div class="authors-affiliations">
+                <span><sup>1</sup>Stanford University</span>
+                <span><sup>2</sup>NVIDIA Research</span>
+              </div>
+              <div class="authors-equal">
+                <sup>*</sup>Equal contribution
+              </div>
+            </div>
+            <div class="conference-badge" aria-label="Publication venue">
+              <span class="conference-name">NeurIPS 2025</span>
+              <span class="spotlight-tag">Spotlight</span>
+            </div>
+            <div class="tldr-card">
+              <strong>TL;DR:</strong>
+              A point cloud generative model that turns unposed parts into assembled shapes.
+            </div>
           </div>
-        <p class="has-text-centered" style="margin-top: 1rem; font-size: 1em; font-weight: 500; font-style: italic; color: #000;">
-          <b><i>TL;DR:</i></b>  A point cloud generative model that turns unposed parts into assembled shapes. 
-        </p>
-        </div>
-      </div>
-    </section>
+          <div class="page-stack">
 
     <!-- Gallery -->
-    <section class="hero teaser is-small is-light" style="margin-top: -20px;">
+    <div class="hero teaser is-small is-light gallery-hero" style="margin-top: -20px;">
       <div class="is-max-desktop has-text-centered">
         <div class="hero-body">
           <!-- <h2 class="title is-5"></h2> -->
@@ -240,46 +236,46 @@
             </div>
           </div>
       </div>
-    </section>
+    </div>
 
-    <section class="section pt-0">
+    <div class="section pt-0 soft-section">
       <div class="container is-max-desktop">
         <div class="columns is-centered has-text-centered">
           <div class="column is-five-fifths">
-            <!-- Abstract -->
-             <br>
-            <h3 class="title is-4">Abstract</h3>
-            <div class="has-text-justified" style="width: 90%; margin: 0 auto;">
-              <p>
-                We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem. 
-                <!-- <br><br> -->
-                Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered. 
+            <div class="content-card">
+              <h3 class="title is-4 section-title">Abstract</h3>
+              <div class="has-text-justified narrow-content">
+                <p>
+                  We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem.
+                  <!-- <br><br> -->
+                  Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered.
 In contrast to prior work that regresses part-wise poses with ad-hoc symmetry handling, our method intrinsically learns assembly symmetries without symmetry labels.
 <br><br>
-Together with a self-supervised encoder focused on overlapping points, our method achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly. 
+Together with a self-supervised encoder focused on overlapping points, our method achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly.
 Notably, our unified formulation enables effective joint training on diverse datasets, facilitating the learning of shared geometric priors and consequently boosting accuracy.
-              </p>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="hero is-small">
+    <div class="hero is-small framework-hero">
       <div class="hero-body">
         <div class="container is-max-desktop">
-          <h3 class="title is-4 has-text-centered">Framework</h3>
-        <p style="width: 90%; margin: 0 auto; padding-bottom: 1rem">
+          <h3 class="title is-4 has-text-centered section-title">Framework</h3>
+        <p class="narrow-content framework-lead">
           Rectified Point Flow supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
         </p>
           <!-- Teaser figure -->
           <div class="columns is-centered has-text-centered">
             <div class="column is-fll">
               <div class="publication-teaser">
-                <img 
-                  src="images/overview_flow_asm.png" 
+                <img
+                  src="images/overview_flow_asm.png"
                   alt="ReStyle3D method teaser figure"
-                  class="publication-teaser-img"
+                  class="publication-teaser-img framed-image"
                   style="width: 90%;"
                 >
               </div>
@@ -287,9 +283,9 @@ Notably, our unified formulation enables effective joint training on diverse dat
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="section pt-0">
+    <div class="section pt-0 soft-section">
       <div class="container is-max-desktop">
         <div class="columns is-centered has-text-centered">
           <div class="column is-five-fifths">
@@ -334,9 +330,9 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </p>
               </div> -->
               <!-- Quantitative table -->
-              <section class="section">
+              <div class="section">
                 <div class="container is-max-desktop has-text-centered is-centered">
-              <h2 class="title is-4 has-text-centered">Multi-part Shape Assembly</h2>
+              <h2 class="title is-4 has-text-centered section-title">Multi-part Shape Assembly</h2>
 
               <p class="has-text-justified" style="width: 90%; padding-bottom: 2rem; margin: 0 auto;">
                 We evaluate our method on the multi-part shape assembly task, where the goal is to estimate the poses of multiple parts given their unposed point clouds.
@@ -354,6 +350,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
                     src="./images/result_assembly.png"
                     alt="Comparison with other methods"
                     style="width: 90%; display: block; margin: 0 auto;"
+                    class="framed-image"
                   >
                   <figcaption>
                     <!-- <strong>Image appearance transfer results.</strong> -->
@@ -362,7 +359,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
                 </figure>
               </div>
               </div>
-              </section>
+              </div>
 
               <!-- <section class="section">
               <h2 class="title is-4 has-text-centered">Pairwise Registration</h2>
@@ -378,9 +375,9 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </figure>
               </section> -->
 
-              <section class="section">
+              <div class="section">
                 <div class="container is-max-desktop" style="width: 90%; margin: 0 auto;">
-              <h2 class="title is-4 has-text-centered">Linear Interpolation in Noise Space</h2>
+              <h2 class="title is-4 has-text-centered section-title">Linear Interpolation in Noise Space</h2>
               <p class="has-text-justified" style="padding-bottom: 2rem; margin: 0 auto;">
                 We visualize the linear interpolation in the noise space by generating the assembled point cloud from \( Z(s) \), where  \( Z(s) \) interpolates linearly between two Gaussian noise vectors \( Z_0 \) and \( Z_1 \). We observe a continuous, semantically meaningful
 mapping from Gaussian noise to valid assemblies.
@@ -464,9 +461,9 @@ mapping from Gaussian noise to valid assemblies.
                 </div>
               </div>
               </div>
-              </section>
+              </div>
 
-              <section class="section">
+              <div class="section">
               <h2 class="title is-4 has-text-centered">Generalization to Unseen Assemblies</h2>
 
                   <div class="columns is-centered" style="gap: 1rem;">
@@ -484,6 +481,7 @@ mapping from Gaussian noise to valid assemblies.
                       style="margin: 10px auto;"
                       src="./images/merge_object_same.png"
                       alt="Comparison with other methods"
+                      class="framed-image"
                     >
                   </div>
                 </div>
@@ -504,6 +502,7 @@ mapping from Gaussian noise to valid assemblies.
                       style="margin: 10px auto;"
                       src="./images/merge_object_diff.png"
                       alt="Comparison with other methods"
+                      class="framed-image"
                     >
                       
                     </div>
@@ -516,14 +515,14 @@ mapping from Gaussian noise to valid assemblies.
               <!--/ Matting. -->
               
               </figure>
-              </section>
+              </div>
               </div>
               
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- <section>
       <div class="container is-max-desktop has-text-centered">
@@ -536,9 +535,9 @@ mapping from Gaussian noise to valid assemblies.
 
     </section> -->
     
-<section class="section" id="BibTeX" style="margin-top: -80px;">
+    <div class="section soft-section" id="concurrent-works" style="margin-top: -80px;">
       <div class="container is-max-desktop content px-2">
-        <h3 class="title">Concurrent Works</h3>
+        <h3 class="title section-title">Concurrent Works</h3>
           <p>
             We are pleased to see several concurrent works that explore flow matching for pose estimation. Check them as well!
             <br>
@@ -548,12 +547,12 @@ mapping from Gaussian noise to valid assemblies.
             - <a href="https://arxiv.org/abs/2505.21539v1">Equivariant Flow Matching for Point Cloud Assembly</a> handles part symmetry like ours, but with a proposed equivariant flow model working on top of an SE(3)-equivariant encoder.
           </p>
       </div>
-    </section>
+    </div>
 
 
-    <section class="section" id="BibTeX" style="margin-top: -30px;">
+    <div class="section soft-section" id="BibTeX" style="margin-top: -30px;">
       <div class="container is-max-desktop content px-2">
-        <h3 class="title">BibTeX</h3>
+        <h3 class="title section-title">BibTeX</h3>
         <pre><code>@inproceedings{sun2025_rpf,
       author = {Sun, Tao and Zhu, Liyuan and Huang, Shengyu and Song, Shuran and Armeni, Iro},
       title = {Rectified Point Flow: Generic Point Cloud Pose Estimation},
@@ -561,10 +560,14 @@ mapping from Gaussian noise to valid assemblies.
       year = {2025},
 }</code></pre>
       </div>
+    </div>
+
+          </div>
+        </div>
+      </div>
     </section>
 
 
-    
     <footer class="footer pt-4 pb-0">
       <div class="container">
         <div class="columns is-centered">
