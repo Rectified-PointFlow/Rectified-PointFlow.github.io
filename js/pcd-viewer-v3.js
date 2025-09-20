@@ -112,7 +112,7 @@ function initInputViewer(container, objName) {
 
   // Scene, camera, renderer
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xF5F5F5);
+  scene.background = new THREE.Color(0xFCFCFC);
 
   const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 1000);
   camera.position.set(0, 1.4, 5);
@@ -285,7 +285,7 @@ function initSampledViewer(container, objName, initialSampleId) {
 
   // Scene, camera, renderer
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xF5F5F5);
+  scene.background = new THREE.Color(0xFCFCFC);
 
   const camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 1000);
   camera.position.set(0, viewerParams[objName].cameraY, 5);
@@ -1032,7 +1032,7 @@ function selectObject(objName) {
   const inputDiv = document.createElement('div');
   inputDiv.classList.add('viewer');
   inputDiv.id = `input-viewer`;
-  inputDiv.style.border = '1px solid #ccc';
+  // inputDiv.style.border = '1px solid #ccc';
   inputDiv.style.borderRadius = '8px';
   inputDiv.style.marginTop = '15px';
   inputDiv.style.flex = '1 1 280px';
