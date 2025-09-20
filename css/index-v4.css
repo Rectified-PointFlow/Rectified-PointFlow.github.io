@@ -300,12 +300,11 @@ body {
 
 .controls-bar .tab-button:hover {
   background: #f0f0f0;
-  border-color: #888;
+  /* border-color: #888; */
 }
 
 .controls-bar .tab-button.active {
-  background: #e0e0e0;
-  border-color: #333;
+  border: 1px solid #394b6c;
 }
 
 .rotate-button:hover {
@@ -391,8 +390,9 @@ body {
 .assembled-caption hr {
   border: none;
   /* color: #3730a3; */
-  width: 100%;
-  border-top: 1px solid #c0c9d5;
+  width: 0%;
+  /* border-top: 1px solid #c0c9d5; */
+  color: transparent;
   margin-top: 1px;
   margin-bottom: 2px;
 }
@@ -402,10 +402,15 @@ body {
 .assembled-subcaption {
   display: block;
   font-size: 0.95rem;
-  color: #3730a3;
+  /* background-color: #eaedf1; */
   font-weight: 400;
   margin-top: 4px;
   margin-bottom: 5px;
+  border-radius: 999px;
+  padding: 0.2rem 1rem;
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  /* box-shadow: 0 38px 70px -48px rgba(79, 70, 229, 0.6); */
+  color: #284065;
 }
 
 
@@ -429,7 +434,7 @@ body {
   display: flex;
   flex-direction: column;   /* stack the canvas‐row and the info‐bar vertically */
   align-items: center;      /* center children horizontally */
-  width: 90%;               /* 90% of parent’s width (as before) */
+  width: 99%;               /* 90% of parent’s width (as before) */
   margin: 1rem auto;        /* optional: add some vertical spacing between containers */
   box-sizing: border-box;
 }
@@ -636,7 +641,7 @@ body {
 
 .hero-links .link-block a {
   margin: 0;
-  min-width: 150px;
+  min-width: 140px;
   border: none;
   display: inline-flex;
   align-items: center;
@@ -681,6 +686,7 @@ body {
   gap: 0.65rem 1.5rem;
   font-size: 1.08rem;
   font-weight: 500;
+  padding-top: 0.5rem;
 }
 
 .authors-list .author a {
@@ -885,6 +891,11 @@ pre {
   pointer-events: none;
 }
 
+.footer {
+  padding-top: 2rem;
+  background-color: #fff;
+}
+
 @media screen and (max-width: 1215px) {
   .landing-card {
     padding: 2.8rem 2.5rem 2.2rem;
@@ -941,6 +952,24 @@ pre {
 }
 
 @media screen and (max-width: 480px) {
+  .landing-card {
+    padding: 1rem 1.75rem 1rem;
+  }
+
+  .landing-card .authors-list {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .landing-card .authors-affiliations {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .landing-card .title {
+    font-size: 2rem;
+  }
+
   .conference-badge {
     flex-direction: column;
     align-items: center;
@@ -955,5 +984,11 @@ pre {
 
   .spotlight-tag::before {
     display: none;
+  }
+
+  /* make the button on the landing hero smaller */
+  .hero-links .link-block a {
+    font-size: 0.8rem;
+    min-width: 120px;
   }
 }

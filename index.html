@@ -63,7 +63,7 @@
     <script src="./js/bulma-carousel.min.js"></script>
     <script src="./js/bulma-slider.min.js"></script>
     <script src="./js/fontawesome.all.min.js"></script>
-    <script src="./js/pcd-viewer-v3.js" type="module"></script>
+    <script src="./js/pcd-viewer-v4.js" type="module"></script>
     <script type="module" src="https://esm.sh/gifuct-js@2.1.2"></script>
     <script src="./js/slider.js" type="module"></script>
 
@@ -189,7 +189,7 @@
                   <div class="column is-five-fifths">
                     <div class="">
                       <h3 class="title is-4 section-title">Abstract</h3>
-                      <div class="has-text-justified">
+                      <div class="has-text-left">
                         <p>
                           We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem.
                           <!-- <br><br> -->
@@ -276,7 +276,7 @@
           <div class="column is-five-fifths">
             <div class="">
               <h3 class="title is-4 section-title">Framework</h3>
-              <div class="has-text-justified mb-2 narrow-content">
+              <div class="has-text-left mb-2">
                 <p>
                   Rectified Point Flow supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
                 </p>
@@ -288,7 +288,7 @@
                       src="images/overview_flow_asm.png"
                       alt="ReStyle3D method teaser figure"
                       class="publication-teaser-img framed-image"
-                      style="width: 90%;"
+                      style="width: 100%;"
                     >
                   </div>
                 </div>
@@ -305,7 +305,7 @@
           <div class="column is-five-fifths">
             <!-- Abstract -->
             <!-- <h3 class="title is-3">Abstract</h3>
-            <div class="content has-text-justified">
+            <div class="content has-text-left">
               <p>
                 We introduce 
               </p>
@@ -313,7 +313,7 @@
 
             <!-- Method. -->
             <!-- <h2 class="title is-3">How it works</h2>
-            <div class="content has-text-justified">
+            <div class="content has-text-left">
               <div class="columns is-centered " style="align-items: center;">
                 <div class="column is-half">
                   <img
@@ -335,7 +335,7 @@
                 </div>
               </div>
             </div>
-              <div class="content has-text-justified">
+              <div class="content has-text-left">
               <p>
                 <b
                   >Two-stage approach of Pipeline. 
@@ -348,7 +348,7 @@
                 <div class="container is-max-desktop has-text-centered is-centered">
               <h2 class="title is-4 has-text-centered section-title">Multi-part Shape Assembly</h2>
 
-              <p class="has-text-justified" style="width: 90%; padding-bottom: 2rem; margin: 0 auto;">
+              <p class="has-text-left" style="padding-bottom: 2rem; margin: 0 auto;">
                 We evaluate our method on the multi-part shape assembly task, where the goal is to estimate the poses of multiple parts given their unposed point clouds.
                 
                 <br><br>
@@ -357,13 +357,13 @@
 
               <!-- column labels -->
               <!-- the full‐width composite figure -->
-              <div class="columns is-centered has-text-centered">
+              <div class="columns is-centered has-text-centered" style="margin-top: 1rem;">
                 <figure class="image is-fullwidth">
                   <img
                     id="comparison"
                     src="./images/result_assembly.png"
                     alt="Comparison with other methods"
-                    style="width: 90%; display: block; margin: 0 auto;"
+                    style="width: 100%; display: block; margin: 0 auto;"
                     class="framed-image"
                   >
                   <figcaption>
@@ -390,14 +390,14 @@
               </section> -->
 
               <div class="section">
-                <div class="container is-max-desktop" style="width: 90%; margin: 0 auto; margin-top: 1rem;">
+                <div class="container is-max-desktop" style="margin: 0 auto; margin-top: 1rem;">
               <h2 class="title is-4 has-text-centered section-title">Linear Interpolation in Noise Space</h2>
-              <p class="has-text-justified" style="padding-bottom: 2rem; margin: 0 auto;">
+              <p class="has-text-left" style="padding-bottom: 2rem; margin: 0 auto;">
                 We visualize the linear interpolation in the noise space by generating the assembled point cloud from \( Z(s) \), where  \( Z(s) \) interpolates linearly between two Gaussian noise vectors \( Z_0 \) and \( Z_1 \). We observe a continuous, semantically meaningful
 mapping from Gaussian noise to valid assemblies.
               </p>
 
-              <h2 class="title is-6 mb-2 has-text-justified">Part Interchanging</h2>
+              <h2 class="title is-6 mb-2 has-text-left">Part Interchanging</h2>
               <div class="columns is-centered has-text-centered">
                 <div class="slider-container"
                     data-gif-url="images/linear_interpolation_2.gif"
@@ -436,7 +436,7 @@ mapping from Gaussian noise to valid assemblies.
                 </div>
               </div>
               
-              <h2 class="title is-6 mb-2 has-text-justified">Structural Changing</h2>
+              <h2 class="title is-6 mb-2 has-text-left">Structural Changing</h2>
               <div class="columns is-centered has-text-centered">
                 <div class="slider-container"
                     data-gif-url="images/linear_interpolation_1.gif"
@@ -484,7 +484,7 @@ mapping from Gaussian noise to valid assemblies.
 
                 <!-- Visual Effects. -->
                 <div class="column is-max-desktop">
-                  <div class="content has-text-justified">
+                  <div class="content has-text-left">
                     <h2 class="title is-6 mb-2">Parts from Same Categories</h2>
                     <p style="text-align: justify;">
                       We test the model’s ability to generalize to unseen assemblies composed of parts from two different objects within the same category. 
@@ -503,7 +503,7 @@ mapping from Gaussian noise to valid assemblies.
 
                 <!-- Matting. -->
                 <div class="column">
-                  <div class="content has-text-justified">
+                  <div class="content has-text-left">
                   <h2 class="title is-6 mb-2">Parts from Different Categories</h2>
                   <div class="columns is-centered">
                     <div class="column content">
