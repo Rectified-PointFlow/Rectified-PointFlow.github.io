@@ -101,59 +101,8 @@
                 Rectified Point Flow: <br />
                 Generic Point Cloud Pose Estimation
               </h1>
-              <p class="subtitle hero-subtitle">
-                A unified rectified flow that assembles unposed parts into coherent shapes and recovers precise poses from point clouds.
-              </p>
-              <div class="publication-links hero-links">
-                <span class="link-block">
-                  <a
-                    href="https://arxiv.org/abs/2506.05282"
-                    rel="noopener noreferrer"
-                    class="external-link button is-normal is-rounded"
-                  >
-                    <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
-                    </span>
-                    <span>Paper</span>
-                  </a>
-                </span>
-                <span class="link-block">
-                  <a
-                    href="https://github.com/GradientSpaces/Rectified-Point-Flow"
-                    rel="noopener noreferrer"
-                    class="external-link button is-normal is-rounded"
-                  >
-                    <span class="icon">
-                      <i class="fab fa-github"></i>
-                    </span>
-                    <span>Code</span>
-                  </a>
-                </span>
-                <span class="link-block">
-                  <a
-                    href="https://huggingface.co/gradient-spaces/"
-                    rel="noopener noreferrer"
-                    class="external-link button is-normal is-rounded"
-                  >
-                    <span class="icon">&#129303;</span>
-                    <span>Model</span>
-                  </a>
-                </span>
-                <span class="link-block">
-                  <a
-                    href="https://huggingface.co/gradient-spaces/"
-                    rel="noopener noreferrer"
-                    class="external-link button is-normal is-rounded"
-                  >
-                    <span class="icon">
-                      <img src="./images/dataset-icon.svg" alt="Dataset icon" width="16" height="16" />
-                    </span>
-                    <span>Dataset</span>
-                  </a>
-                </span>
-              </div>
             </div>
-            <div class="authors-block">
+            <div class="authors-block" style="margin-top: 1rem;">
               <div class="authors-list">
                 <span class="author"><a href="https://taosun.io/">Tao Sun</a><sup>1,*</sup></span>
                 <span class="author"><a href="https://www.zhuliyuan.net/">Liyuan Zhu</a><sup>1,*</sup></span>
@@ -164,26 +113,103 @@
               <div class="authors-affiliations">
                 <span><sup>1</sup>Stanford University</span>
                 <span><sup>2</sup>NVIDIA Research</span>
+                <span>(<sup>*</sup>equal contribution)</span>
               </div>
-              <div class="authors-equal">
-                <sup>*</sup>Equal contribution
-              </div>
+              <!-- <div class="authors-equal">
+                
+              </div> -->
             </div>
-            <div class="conference-badge" aria-label="Publication venue">
+            <div class="conference-badge has-text-centered" aria-label="Publication venue">
               <span class="conference-name">NeurIPS 2025</span>
               <span class="spotlight-tag">Spotlight</span>
             </div>
+            <div class="publication-links hero-links">
+              <span class="link-block">
+                <a
+                  href="https://arxiv.org/abs/2506.05282"
+                  rel="noopener noreferrer"
+                  class="external-link button is-normal is-rounded"
+                >
+                  <span class="icon">
+                    <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a
+                  href="https://github.com/GradientSpaces/Rectified-Point-Flow"
+                  rel="noopener noreferrer"
+                  class="external-link button is-normal is-rounded"
+                >
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a
+                  href="https://huggingface.co/gradient-spaces/"
+                  rel="noopener noreferrer"
+                  class="external-link button is-normal is-rounded"
+                >
+                  <span class="icon">&#129303;</span>
+                  <span>Model</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a
+                  href="https://huggingface.co/gradient-spaces/"
+                  rel="noopener noreferrer"
+                  class="external-link button is-normal is-rounded"
+                >
+                  <span class="icon">
+                    <img src="./images/dataset-icon.svg" alt="Dataset icon" width="16" height="16" />
+                  </span>
+                  <span>Dataset</span>
+                </a>
+              </span>
+            </div>
             <div class="tldr-card">
+              <p class="has-text-centered">
+                Learning a continuous Euclidean-space point flow that <br /> assembles unposed parts and recovers <strong>poses from assembled shapes.</strong>
+              </p>
+            </div>
+            <!-- <div class="tldr-card">
               <strong>TL;DR:</strong>
               A point cloud generative model that turns unposed parts into assembled shapes.
-            </div>
+            </div> -->
           </div>
           <div class="page-stack">
 
+            <div class="section soft-section" style="margin-top: -2rem;">
+              <div class="container is-max-desktop">
+                <div class="columns is-centered has-text-centered">
+                  <div class="column is-five-fifths">
+                    <div class="">
+                      <h3 class="title is-4 section-title">Abstract</h3>
+                      <div class="has-text-justified">
+                        <p>
+                          We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem.
+                          <!-- <br><br> -->
+                          Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered.
+        In contrast to prior work that regresses part-wise poses with ad-hoc symmetry handling, our method intrinsically learns assembly symmetries without symmetry labels.
+        <br><br>
+        Together with a self-supervised encoder focused on overlapping points, our method achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly.
+        Notably, our unified formulation enables effective joint training on diverse datasets, facilitating the learning of shared geometric priors and consequently boosting accuracy.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
     <!-- Gallery -->
-    <div class="hero teaser is-small is-light gallery-hero" style="margin-top: -20px;">
+    <div class="hero teaser gallery-hero" style="margin-top: -6rem;">
       <div class="is-max-desktop has-text-centered">
-        <div class="hero-body">
+        <div class="">
           <!-- <h2 class="title is-5"></h2> -->
 
           <!-- PCD Viewer -->
@@ -208,76 +234,64 @@
                <img width="20px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACM0lEQVR4nO2azUobURSAP8EiTd+hEQrtzoKbtrtsahLaV7DNwq3VbTXu20ajPkQg4LbxFWITVy6UCr6DIG5EbbnlCjaMd0z0nLlMzgcHApnJ+Zk75+fegGEYhmEYhmEYxsOZBmrAGvDtkcX95mevIzo+AH3gj5L0gCoR8AzYUXR8UNpAIUvnf2Xo/I3sZRWEnQicv70SVPkYgdODUtEMQD8ChwfFvY4qTKcYcgX8BBqPWAIb/jevAnqvgaJGAGopzpcFdVdSguD6BHFWAwa4pyTNbkD/ioJ+NgIGbCro3wzod7aJ8zVggPtOgmXgCDgBTgP6T/01h8AXIVt46xNOUhJ6I9RwXY5QFS4lG6RGgsLvQromgOMRAvDb3ytGGdgGtoA5SUVAKSX7J1Ujd0+uaA4RgHVyyBRwcA/nXQJ8qmXUay9azAIXAecv/DUqLPjMf+0/a7EWCEBdy4gXwNktxefAKyXdk0A3wfl94ImWAXtZGnDHA3ippJt6YAm65ZnrV3A2piTkE/DMWJehWBuRJjmjFGErWvGt+LZ0Kz7hB4thh5FjwWEkaU/ih5AuYhtH3ymP4/9Y8sltmA2JRWRYyWBD5j/GfktsNfAEOozBpmgtJftLntBUU6rRJyI5GOkIHIx07nEw8hwleiNUBWlxA5oa1QgcHpT3KNOOwOkbaZEBhTv2BbSlm+XwVch4JbRimTwryquhq3AWMRJFX4vrAn+Tcw3YvGapMwzDMAzDMAyD3PIXrhcvcPyJl0UAAAAASUVORK5CYII=" alt="refresh"> <span>Re-sample: On</span>
             </button>
           </div> -->
-          <div class="viewers-container">
-            <!-- JS will inject three viewers here when you click a tab -->
-          </div>
-            <div class="columns is-centered has-text-centered" style="margin-top: 1rem;">
-              <p class="subtitle is-6" style="color: #666; margin-bottom: 1rem; font-size: 0.95rem;">
+            <div class="vis-card" style="margin-top: 1rem; width: 114%; margin-left: -7%; padding-top: 1.2rem; padding-bottom: 1rem; padding-left: 10px; padding-right: 10px;">
+              <div class="viewers-container">
+                <!-- JS will inject three viewers here when you click a tab -->
+              </div>
+              
+              <div>
+              <p class="subtitle is-6" style="color: #666; margin-top: 1rem; font-size: 0.95rem; line-height: 1.2;">
                 The model samples new assemblies each time. They show meaningful variation, particularly for symmetric parts.
                 <br>
                 Orbit the viewer to see from different angles. Switch between objects using the buttons below.
               </p>
-          </div>
-          <div class="controls-bar">
-            <button class="tab-button" data-obj="partnet_78">Chair</button>
-            <button class="tab-button" data-obj="partnet_652">Office Chair</button>
-            <button class="tab-button" data-obj="partnet_680">Table</button>
-            
-            <div class="rotate-controls">
-            <button id="btn-rotate" class="rotate-button">
-             Rotate: On
-            </button>
-            <button id="btn-traj" class="rotate-button">
-              Trajectory: Off
-            </button>
-            <button id="btn-pause" class="rotate-button">
-              Pause
-            </button>
             </div>
+
+            <div class="controls-bar">
+              <button class="tab-button" data-obj="partnet_78">Chair</button>
+              <button class="tab-button" data-obj="partnet_652">Office Chair</button>
+              <button class="tab-button" data-obj="partnet_680">Table</button>
+              
+              <div class="rotate-controls">
+              <button id="btn-rotate" class="rotate-button">
+               Rotate: On
+              </button>
+              <button id="btn-traj" class="rotate-button">
+                Trajectory: Off
+              </button>
+              <button id="btn-pause" class="rotate-button">
+                Pause
+              </button>
+              </div>
+            </div>
+
           </div>
       </div>
     </div>
 
-    <div class="section pt-0 soft-section">
+
+    <div class="section soft-section" style="margin-top: 2rem;">
       <div class="container is-max-desktop">
         <div class="columns is-centered has-text-centered">
           <div class="column is-five-fifths">
-            <div class="content-card">
-              <h3 class="title is-4 section-title">Abstract</h3>
-              <div class="has-text-justified narrow-content">
+            <div class="">
+              <h3 class="title is-4 section-title">Framework</h3>
+              <div class="has-text-justified mb-2 narrow-content">
                 <p>
-                  We introduce <span class="methodname">Rectified Point Flow</span>, a unified parameterization that formulates pairwise point cloud registration and multi-part shape assembly as a single conditional generative problem.
-                  <!-- <br><br> -->
-                  Given unposed point clouds, our method learns a continuous point-wise velocity field that transports noisy points toward their target positions, from which part poses are recovered.
-In contrast to prior work that regresses part-wise poses with ad-hoc symmetry handling, our method intrinsically learns assembly symmetries without symmetry labels.
-<br><br>
-Together with a self-supervised encoder focused on overlapping points, our method achieves a new state-of-the-art performance on six benchmarks spanning pairwise registration and shape assembly.
-Notably, our unified formulation enables effective joint training on diverse datasets, facilitating the learning of shared geometric priors and consequently boosting accuracy.
+                  Rectified Point Flow supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero is-small framework-hero">
-      <div class="hero-body">
-        <div class="container is-max-desktop">
-          <h3 class="title is-4 has-text-centered section-title">Framework</h3>
-        <p class="narrow-content framework-lead">
-          Rectified Point Flow supports <span class="emph">shape assembly</span> and <span class="emph">pairwise registration</span> tasks in a single framework. Given a set of unposed part point clouds \(\{\bar {X}_i\}_{i\in\Omega}\), it predicts each part's point cloud at the target assembled state \(\{\hat {X}_i{(0)}\}_{i\in\Omega}\). Subsequently, we solve Procrustes problem via SVD between the condition point cloud \(\bar X_i\) and the estimated point cloud \(\hat X_i(0)\) to recover the rigid transformation \(\hat T_i\) for each non-anchored part.
-        </p>
-          <!-- Teaser figure -->
-          <div class="columns is-centered has-text-centered">
-            <div class="column is-fll">
-              <div class="publication-teaser">
-                <img
-                  src="images/overview_flow_asm.png"
-                  alt="ReStyle3D method teaser figure"
-                  class="publication-teaser-img framed-image"
-                  style="width: 90%;"
-                >
+              <div class="columns is-centered has-text-centered" style="margin-top: 1rem;"></div>
+                <div class="column is-fullwidth">
+                  <div class="publication-teaser">
+                    <img
+                      src="images/overview_flow_asm.png"
+                      alt="ReStyle3D method teaser figure"
+                      class="publication-teaser-img framed-image"
+                      style="width: 90%;"
+                    >
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -330,7 +344,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </p>
               </div> -->
               <!-- Quantitative table -->
-              <div class="section">
+              <div class="section" style="margin-top: -4rem;">
                 <div class="container is-max-desktop has-text-centered is-centered">
               <h2 class="title is-4 has-text-centered section-title">Multi-part Shape Assembly</h2>
 
@@ -376,7 +390,7 @@ Notably, our unified formulation enables effective joint training on diverse dat
               </section> -->
 
               <div class="section">
-                <div class="container is-max-desktop" style="width: 90%; margin: 0 auto;">
+                <div class="container is-max-desktop" style="width: 90%; margin: 0 auto; margin-top: 1rem;">
               <h2 class="title is-4 has-text-centered section-title">Linear Interpolation in Noise Space</h2>
               <p class="has-text-justified" style="padding-bottom: 2rem; margin: 0 auto;">
                 We visualize the linear interpolation in the noise space by generating the assembled point cloud from \( Z(s) \), where  \( Z(s) \) interpolates linearly between two Gaussian noise vectors \( Z_0 \) and \( Z_1 \). We observe a continuous, semantically meaningful
@@ -464,7 +478,7 @@ mapping from Gaussian noise to valid assemblies.
               </div>
 
               <div class="section">
-              <h2 class="title is-4 has-text-centered">Generalization to Unseen Assemblies</h2>
+              <h2 class="title is-4 has-text-centered section-title">Generalization to Unseen Assemblies</h2>
 
                   <div class="columns is-centered" style="gap: 1rem;">
 
@@ -537,7 +551,7 @@ mapping from Gaussian noise to valid assemblies.
     
     <div class="section soft-section" id="concurrent-works" style="margin-top: -80px;">
       <div class="container is-max-desktop content px-2">
-        <h3 class="title section-title">Concurrent Works</h3>
+        <h3 class="title is-4 section-title">Concurrent Works</h3>
           <p>
             We are pleased to see several concurrent works that explore flow matching for pose estimation. Check them as well!
             <br>
